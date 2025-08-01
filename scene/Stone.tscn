@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://d13yvbn6hv5kp"]
+
+[ext_resource type="Texture2D" uid="uid://e13tb1baej0f" path="res://Mancala/Stone.png" id="1_2t3bg"]
+
+[node name="stone" type="Sprite2D"]
+texture = ExtResource("1_2t3bg")

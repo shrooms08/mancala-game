@@ -1,0 +1,73 @@
+[gd_scene load_steps=4 format=3 uid="uid://dw42mbnd38548"]
+
+[ext_resource type="Texture2D" uid="uid://spdfuavmf3ws" path="res://Mancala/Mancala Board.png" id="1_vndtl"]
+[ext_resource type="Texture2D" uid="uid://cjbwmx6spvs88" path="res://Mancala/Pit.png" id="2_mmaov"]
+[ext_resource type="Texture2D" uid="uid://dn2tj6ej3884g" path="res://Mancala/Store.png" id="3_irjl5"]
+
+[node name="Pit Scene" type="Node2D"]
+
+[node name="Pit" type="Node2D" parent="."]
+
+[node name="Board" type="Sprite2D" parent="Pit"]
+position = Vector2(360, 640)
+texture = ExtResource("1_vndtl")
+
+[node name="P1 Pit 1" type="Sprite2D" parent="Pit"]
+position = Vector2(120, 780)
+texture = ExtResource("2_mmaov")
+
+[node name="P1 Pit 2" type="Sprite2D" parent="Pit"]
+position = Vector2(220, 780)
+texture = ExtResource("2_mmaov")
+
+[node name="P1 Pit 3" type="Sprite2D" parent="Pit"]
+position = Vector2(320, 780)
+texture = ExtResource("2_mmaov")
+
+[node name="P1 Pit 4" type="Sprite2D" parent="Pit"]
+position = Vector2(420, 780)
+texture = ExtResource("2_mmaov")
+
+[node name="P1 Pit 5" type="Sprite2D" parent="Pit"]
+position = Vector2(520, 780)
+texture = ExtResource("2_mmaov")
+
+[node name="P1 Pit 6" type="Sprite2D" parent="Pit"]
+position = Vector2(620, 780)
+texture = ExtResource("2_mmaov")
+
+[node name="P2 Pit 1" type="Sprite2D" parent="Pit"]
+position = Vector2(120, 510)
+texture = ExtResource("2_mmaov")
+
+[node name="P2 Pit 2" type="Sprite2D" parent="Pit"]
+position = Vector2(220, 510)
+texture = ExtResource("2_mmaov")
+
+[node name="P2 Pit 3" type="Sprite2D" parent="Pit"]
+position = Vector2(320, 510)
+texture = ExtResource("2_mmaov")
+
+[node name="P2 Pit 4" type="Sprite2D" parent="Pit"]
+position = Vector2(420, 510)
+texture = ExtResource("2_mmaov")
+
+[node name="P2 Pit 5" type="Sprite2D" parent="Pit"]
+position = Vector2(520, 510)
+texture = ExtResource("2_mmaov")
+
+[node name="P2 Pit 6" type="Sprite2D" parent="Pit"]
+position = Vector2(620, 510)
+texture = ExtResource("2_mmaov")
+
+[node name="Store P1" type="Sprite2D" parent="Pit"]
+position = Vector2(37, 648)
+texture = ExtResource("3_irjl5")
+
+[node name="Store P2" type="Sprite2D" parent="Pit"]
+position = Vector2(673, 648)
+texture = ExtResource("3_irjl5")
+
+[node name="Stone Count" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0

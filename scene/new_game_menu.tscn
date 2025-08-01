@@ -1,0 +1,175 @@
+[gd_scene load_steps=12 format=3 uid="uid://gw6ui6wji7y7"]
+
+[ext_resource type="FontFile" uid="uid://mxhuv22vha46" path="res://Mancala/PIXBOB LITE.otf" id="1_u4y68"]
+[ext_resource type="Script" uid="uid://p1spkbeqse6w" path="res://Script/new_game_menu.gd" id="1_ujdhf"]
+[ext_resource type="FontFile" uid="uid://ckdd6uu4s0awx" path="res://Mancala/PIXBOB LITE.ttf" id="2_67rka"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ujdhf"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+shadow_color = Color(0.127388, 0.16854, 0.338034, 0.756863)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_67rka"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_67rka"]
+bg_color = Color(0.133196, 0.133196, 0.133196, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.0383972, 0.0383972, 0.0383972, 1)
+shadow_size = 2
+shadow_offset = Vector2(0, 1.2)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ujdhf"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rc58j"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_lpx4v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_n7ysh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rc58j"]
+bg_color = Color(0.419608, 0.501961, 0.796078, 0.756863)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.0603781, 0.0865338, 0.194698, 0.756863)
+shadow_size = 1
+shadow_offset = Vector2(0, 2)
+
+[node name="New game menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ujdhf")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ujdhf")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.041
+anchor_right = 0.5
+anchor_bottom = 0.041
+offset_left = -44.0
+offset_top = -22.48
+offset_right = 44.0
+offset_bottom = 0.519997
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_u4y68")
+theme_override_font_sizes/font_size = 50
+text = "NEW GAME"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.355
+anchor_right = 0.5
+anchor_bottom = 0.355
+offset_left = -341.0
+offset_top = -129.4
+offset_right = 341.0
+offset_bottom = 176.6
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="Tournaments" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_67rka")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/focus = SubResource("StyleBoxEmpty_67rka")
+theme_override_styles/hover = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/normal = SubResource("StyleBoxFlat_67rka")
+text = "Tournaments
+"
+
+[node name="Play A friend" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_67rka")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/focus = SubResource("StyleBoxEmpty_ujdhf")
+theme_override_styles/hover = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/normal = SubResource("StyleBoxFlat_67rka")
+text = "play a friend
+"
+
+[node name="Play A bot" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_67rka")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/focus = SubResource("StyleBoxEmpty_rc58j")
+theme_override_styles/hover = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/normal = SubResource("StyleBoxFlat_67rka")
+text = "Play a bot
+"
+
+[node name="Play Coach" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("2_67rka")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/focus = SubResource("StyleBoxEmpty_lpx4v")
+theme_override_styles/hover = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/normal = SubResource("StyleBoxFlat_67rka")
+text = "Play Coach
+"
+
+[node name="OptionButton" type="OptionButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.498
+anchor_top = 0.525
+anchor_right = 0.498
+anchor_bottom = 0.525
+offset_left = -36.56
+offset_top = -15.0001
+offset_right = 36.44
+offset_bottom = 15.9999
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("2_67rka")
+selected = 0
+item_count = 1
+popup/item_0/text = "More"
+popup/item_0/id = 0
+
+[node name="START BUTTON" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.214
+anchor_right = 0.5
+anchor_bottom = 0.214
+offset_left = -341.0
+offset_top = -41.92
+offset_right = 341.0
+offset_bottom = 35.08
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_67rka")
+theme_override_font_sizes/font_size = 45
+theme_override_styles/focus = SubResource("StyleBoxEmpty_n7ysh")
+theme_override_styles/hover = SubResource("StyleBoxFlat_rc58j")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_rc58j")
+theme_override_styles/normal = SubResource("StyleBoxFlat_rc58j")
+text = "START GAME"

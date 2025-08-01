@@ -1,0 +1,625 @@
+[gd_scene load_steps=19 format=3 uid="uid://c6yits07qsjhp"]
+
+[ext_resource type="Script" uid="uid://b5fcdjnjwaac8" path="res://Script/main.gd" id="1_0ha60"]
+[ext_resource type="Texture2D" uid="uid://spdfuavmf3ws" path="res://Mancala/Mancala Board.png" id="1_brvut"]
+[ext_resource type="Texture2D" uid="uid://cjbwmx6spvs88" path="res://Mancala/Pit.png" id="3_4j5ol"]
+[ext_resource type="FontFile" uid="uid://mxhuv22vha46" path="res://Mancala/PIXBOB LITE.otf" id="4_0ha60"]
+[ext_resource type="Texture2D" uid="uid://dn2tj6ej3884g" path="res://Mancala/Store.png" id="4_p1hux"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_of57s"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+shadow_color = Color(0.127388, 0.16854, 0.338034, 0.756863)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4j5ol"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0ha60"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_p1hux"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_of57s"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_b5f6u"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_tqoya"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_k65ib"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wscrc"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mswub"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hybxs"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_v2gmf"]
+radius = 25.0
+height = 85.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jcbur"]
+radius = 25.0
+height = 85.0
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_0ha60")
+
+[node name="Panel" type="Panel" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 360.0
+offset_top = 640.0
+offset_right = 360.0
+offset_bottom = 640.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_of57s")
+
+[node name="Board" type="Sprite2D" parent="."]
+position = Vector2(360, 640)
+texture = ExtResource("1_brvut")
+
+[node name="PitNodes" type="Node2D" parent="."]
+
+[node name="Pit0" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(555, 420)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_4j5ol")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit0"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 2.162
+anchor_right = 0.5
+anchor_bottom = 2.162
+offset_left = -22.0
+offset_top = -254.16
+offset_right = 18.0
+offset_bottom = -225.16
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit0"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit0"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit1" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(455, 420)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_4j5ol")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit1"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 2.162
+anchor_right = 0.5
+anchor_bottom = 2.162
+offset_left = -22.0
+offset_top = -254.16
+offset_right = 18.0
+offset_bottom = -225.16
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit1"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit1"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit2" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(355, 420)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_p1hux")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit2"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 2.162
+anchor_right = 0.5
+anchor_bottom = 2.162
+offset_left = -22.0
+offset_top = -254.16
+offset_right = 18.0
+offset_bottom = -225.16
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit2"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit2"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit3" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(255, 420)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_of57s")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit3"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 2.162
+anchor_right = 0.5
+anchor_bottom = 2.162
+offset_left = -22.0
+offset_top = -254.16
+offset_right = 18.0
+offset_bottom = -225.16
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit3"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit3"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit4" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(155, 420)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_b5f6u")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit4"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 2.162
+anchor_right = 0.5
+anchor_bottom = 2.162
+offset_left = -22.0
+offset_top = -254.16
+offset_right = 18.0
+offset_bottom = -225.16
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit4"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit4"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit5" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(55, 420)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_tqoya")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit5"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.806
+anchor_right = 0.5
+anchor_bottom = 0.806
+offset_left = -22.0
+offset_top = -10.08
+offset_right = 18.0
+offset_bottom = 18.92
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit5"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit5"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit6" type="TextureButton" parent="PitNodes"]
+offset_left = -13.0
+offset_top = 550.0
+offset_right = 107.0
+offset_bottom = 730.0
+texture_normal = ExtResource("4_p1hux")
+texture_pressed = ExtResource("4_p1hux")
+texture_hover = ExtResource("4_p1hux")
+stretch_mode = 3
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit6"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.979
+anchor_top = 0.5
+anchor_right = 0.979
+anchor_bottom = 0.5
+offset_left = -14.48
+offset_top = -14.0
+offset_right = 14.52
+offset_bottom = 9.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit6"]
+layout_mode = 1
+anchor_left = 0.533
+anchor_top = 0.5
+anchor_right = 0.533
+anchor_bottom = 0.5
+offset_left = -19.96
+offset_top = -46.0
+offset_right = 20.04
+offset_bottom = 49.0
+
+[node name="Pit7" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(55, 690)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_k65ib")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit7"]
+anchors_preset = -1
+anchor_left = 0.492
+anchor_top = 0.081
+anchor_right = 0.492
+anchor_bottom = 0.081
+offset_left = -21.04
+offset_top = -6.58
+offset_right = 18.96
+offset_bottom = 22.42
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit7"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit7"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit8" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(155, 690)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_wscrc")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit8"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.108
+anchor_right = 0.5
+anchor_bottom = 0.108
+offset_left = -22.0
+offset_top = -11.44
+offset_right = 18.0
+offset_bottom = 17.56
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit8"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit8"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit9" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(255, 690)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_mswub")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit9"]
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.125
+anchor_right = 0.5
+anchor_bottom = 0.125
+offset_left = -22.0
+offset_top = -14.5
+offset_right = 18.0
+offset_bottom = 14.5
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit9"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit9"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit10" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(355, 690)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_hybxs")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit10"]
+anchors_preset = -1
+anchor_left = 0.483
+anchor_top = 0.125
+anchor_right = 0.483
+anchor_bottom = 0.125
+offset_left = -19.96
+offset_top = -14.5
+offset_right = 20.04
+offset_bottom = 14.5
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit10"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit10"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit11" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(455, 690)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_v2gmf")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit11"]
+anchors_preset = -1
+anchor_left = 0.483
+anchor_top = 0.125
+anchor_right = 0.483
+anchor_bottom = 0.125
+offset_left = -19.96
+offset_top = -14.5
+offset_right = 20.04
+offset_bottom = 14.5
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit11"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit11"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit12" type="TouchScreenButton" parent="PitNodes"]
+position = Vector2(555, 690)
+texture_normal = ExtResource("3_4j5ol")
+texture_pressed = ExtResource("3_4j5ol")
+shape = SubResource("CapsuleShape2D_jcbur")
+passby_press = true
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit12"]
+anchors_preset = -1
+anchor_left = 0.475
+anchor_top = 0.125
+anchor_right = 0.475
+anchor_bottom = 0.125
+offset_left = -19.0
+offset_top = -14.5
+offset_right = 19.0
+offset_bottom = 14.5
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit12"]
+layout_mode = 3
+anchor_left = 0.5
+anchor_top = 0.483
+anchor_right = 0.5
+anchor_bottom = 0.483
+offset_left = -23.0
+offset_top = -19.94
+offset_right = 17.0
+offset_bottom = 20.06
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PitNodes/Pit12"]
+position = Vector2(58, 85)
+scale = Vector2(3, 3)
+shape = SubResource("CapsuleShape2D_0ha60")
+
+[node name="Pit13" type="TextureButton" parent="PitNodes"]
+offset_left = 607.0
+offset_top = 550.0
+offset_right = 727.0
+offset_bottom = 730.0
+texture_normal = ExtResource("4_p1hux")
+texture_pressed = ExtResource("4_p1hux")
+texture_hover = ExtResource("4_p1hux")
+stretch_mode = 3
+
+[node name="CountLabel" type="Label" parent="PitNodes/Pit13"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.058
+anchor_top = 0.475
+anchor_right = 0.058
+anchor_bottom = 0.475
+offset_left = -12.96
+offset_top = -9.50001
+offset_right = 13.04
+offset_bottom = 17.5
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StoneContainer" type="Control" parent="PitNodes/Pit13"]
+layout_mode = 1
+anchor_left = 0.533
+anchor_top = 0.475
+anchor_right = 0.533
+anchor_bottom = 0.475
+offset_left = -19.96
+offset_top = -55.5
+offset_right = 20.04
+offset_bottom = 55.5
+
+[node name="Turn label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[connection signal="pressed" from="PitNodes/Pit0" to="." method="_on_pit_0_pressed"]
+[connection signal="pressed" from="PitNodes/Pit1" to="." method="_on_pit_1_pressed"]
+[connection signal="pressed" from="PitNodes/Pit2" to="." method="_on_pit_2_pressed"]
+[connection signal="pressed" from="PitNodes/Pit3" to="." method="_on_pit_3_pressed"]
+[connection signal="pressed" from="PitNodes/Pit4" to="." method="_on_pit_4_pressed"]
+[connection signal="pressed" from="PitNodes/Pit5" to="." method="_on_pit_5_pressed"]
+[connection signal="pressed" from="PitNodes/Pit7" to="." method="_on_pit_7_pressed"]
+[connection signal="pressed" from="PitNodes/Pit8" to="." method="_on_pit_8_pressed"]
+[connection signal="pressed" from="PitNodes/Pit9" to="." method="_on_pit_9_pressed"]
+[connection signal="pressed" from="PitNodes/Pit10" to="." method="_on_pit_10_pressed"]
+[connection signal="pressed" from="PitNodes/Pit11" to="." method="_on_pit_11_pressed"]
+[connection signal="pressed" from="PitNodes/Pit12" to="." method="_on_pit_12_pressed"]

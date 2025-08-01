@@ -1,0 +1,128 @@
+[gd_scene load_steps=5 format=3 uid="uid://cotoni5pfindr"]
+
+[ext_resource type="FontFile" uid="uid://ckdd6uu4s0awx" path="res://Mancala/PIXBOB LITE.ttf" id="1_sak6e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_omwme"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+shadow_color = Color(0.127388, 0.16854, 0.338034, 0.756863)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_aaoo4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kpr15"]
+bg_color = Color(0.133196, 0.133196, 0.133196, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.0383972, 0.0383972, 0.0383972, 1)
+shadow_size = 2
+shadow_offset = Vector2(0, 1.2)
+
+[node name="Play A Friend" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_omwme")
+
+[node name="Send Challenge Link" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -342.0
+offset_top = -407.0
+offset_right = 342.0
+offset_bottom = -353.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_sak6e")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/focus = SubResource("StyleBoxEmpty_aaoo4")
+theme_override_styles/hover = SubResource("StyleBoxFlat_kpr15")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_kpr15")
+theme_override_styles/normal = SubResource("StyleBoxFlat_kpr15")
+text = "                  Send challenge link
+
+"
+alignment = 0
+
+[node name="Find Friends" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -342.0
+offset_top = -327.0
+offset_right = 342.0
+offset_bottom = -273.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_sak6e")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/focus = SubResource("StyleBoxEmpty_aaoo4")
+theme_override_styles/hover = SubResource("StyleBoxFlat_kpr15")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_kpr15")
+theme_override_styles/normal = SubResource("StyleBoxFlat_kpr15")
+text = "                  Find Friends
+
+"
+alignment = 0
+
+[node name="Invite Friends" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -342.0
+offset_top = -253.0
+offset_right = 342.0
+offset_bottom = -199.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_sak6e")
+theme_override_font_sizes/font_size = 30
+theme_override_styles/focus = SubResource("StyleBoxEmpty_aaoo4")
+theme_override_styles/hover = SubResource("StyleBoxFlat_kpr15")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_kpr15")
+theme_override_styles/normal = SubResource("StyleBoxFlat_kpr15")
+text = "                  Invite friends
+
+"
+alignment = 0
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.025
+anchor_right = 0.5
+anchor_bottom = 0.025
+offset_left = -57.5
+offset_top = -12.0
+offset_right = 57.5
+offset_bottom = 11.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("1_sak6e")
+theme_override_font_sizes/font_size = 45
+text = "PLAY A FRIEND"
+horizontal_alignment = 1

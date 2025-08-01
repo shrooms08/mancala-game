@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddcdab5dq8bqc"]
+
+[ext_resource type="Texture2D" uid="uid://cjbwmx6spvs88" path="res://Mancala/Pit.png" id="2_5nem2"]
+
+[node name="Pit" type="Node2D"]
+
+[node name="P1 Pit 1" type="Sprite2D" parent="."]
+position = Vector2(369, 474)
+texture = ExtResource("2_5nem2")
