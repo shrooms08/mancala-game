@@ -5,133 +5,228 @@ var player_turn = 0 #0 = player 1, 1 = player 2
 var game_over = false
 var is_animating = false #Prevent clicks durin animation
 var StoneScene = preload("res://scene/Stone.tscn")
+var is_paused = false
+var vs_ai: bool = false #true = play against AI, false = play with friend
+var ai_delay := 0.5
+var ai_timer := 0.0 
 
-#UI References - will be set in_ready()
-var turn_label: Label
-var player1_score_label: Label
-var player2_score_label: Label
-var status_label: Label
-var restart_button: Button
-var game_ui: Control
+@onready var turn_label: Label = $"Turn label"
+@onready var player_1_score_label: Label = $Player1ScoreLabel
+@onready var player_2_score_label: Label = $Player2ScoreLabel
+@onready var status_label: Label = $StatusLabel
+@onready var new_game_button: Button = $NewGameButton
+@onready var pause_button: Button = $PauseButton
+@onready var paused_overlay: Label = $PausedOverlay
 
 signal game_ended(winner)
 
 func _ready():
 	randomize()
 	print("Game starting...")
-	setup_game_ui()
 	debug_node_structure()
 	connect_touchscreen_signals()
 	update_board_display()
 	update_game_ui()
+	new_game_button.pressed.connect(_on_new_game_pressed)
+	new_game_button.visible = false
+	pause_button.pressed.connect(_on_pause_pressed)
+	paused_overlay.visible = false
+	
+	pause_button.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	paused_overlay.process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	
+	pause_button.disabled = false
+	pause_button.visible = true
+	
+	set_process(true)
+	#Set main game node to be pausable
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	
 	#Enable global touch detection for debugging
 	print("=== Setting up global touch detection ===")
 	
+	#Check game mode and set up accordingly
+	if GameGlobals.is_ai_game():
+		print("Starting AI game with difficulty: ", GameGlobals.ai_difficulty)
+		#Set player 1 name to "AI"
+		player_1_score_label.text = "AI " + str(pits[6])
+	else:
+		print("Starting PVP game")
+		player_1_score_label.text = "Jake " + str(pits[6])
 	
-func setup_game_ui():
-	#Create the main UI container
-	game_ui = Control.new()
-	game_ui.name = "GameUI"
-	game_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(game_ui)
+	if GameGlobals.is_ai_game() and player_turn == 0:
+		ai_timer = ai_delay #Trigger AI move next frame
 	
-	#Turn indicator
-	turn_label = Label.new()
-	turn_label.text = "Player 1's Turn"
-	turn_label.add_theme_font_size_override("font_size", 24)
-	turn_label.add_theme_color_override("font color", Color.WHITE)
-	turn_label.position = Vector2(50,20)
-	game_ui.add_child(turn_label)
+func player_move(pit_index: int):
+	#Your logic here
+	print("Player moved from pit: ", pit_index)
 	
-	#Player 1 Score (bottom left)
-	var player1_container = VBoxContainer.new()
-	player1_container.position = Vector2(50,100)
-	game_ui.add_child(player1_container)
+func _process(delta):
+	if GameGlobals.is_ai_game() and player_turn == 0 and !is_animating and !game_over and !is_paused:
+		ai_timer -= delta
+		if ai_timer <= 0:
+			print("AI timer expired, making move...")
+			make_ai_move()
+			ai_timer = 999.0 
 	
-	var player1_title = Label.new()
-	player1_title.text = "Player 1"
-	player1_title.add_theme_font_size_override("font_size", 18)
-	player1_title.add_theme_color_override("font_color", Color.CYAN)
-	player1_container.add_child(player1_title)
+func make_ai_move():
+	print("AI is thinking...")
 	
-	player1_score_label = Label.new()
-	player1_score_label.text = "Score: 0"
-	player1_score_label.add_theme_font_size_override("font_size", 16)
-	player1_score_label.add_theme_color_override("font_color", Color.WHITE)
-	player1_container.add_child(player1_score_label)
+	#AI controls player 0 (pits 0-6)
+	var possible_moves = []
+	for i in range(0,6):
+		if pits[i] > 0:
+			possible_moves.append(i)
+			
+	if possible_moves.size()  == 0:
+		print("AI has no moves available")
+		return
+		
+	#Choose move based on difficulty
+	var chosen_move = choose_ai_move(possible_moves)
+	print("AI chooses pit: ", chosen_move)
 	
-	#Player 2 Score (top right)
-	var player2_container = VBoxContainer.new()
-	player2_container.position = Vector2(650,50)
-	game_ui.add_child(player2_container)
+	#Execute the move using your existing  system
+	handle_pit_click(chosen_move)
 	
-	var player2_title = Label.new()
-	player2_title.text = "Player 2"
-	player2_title.add_theme_font_size_override("font_size", 18)
-	player2_title.add_theme_color_override("font_color", Color.ORANGE)
-	player2_container.add_child(player2_title)
+func choose_ai_move(possible_moves: Array) -> int:
+	match GameGlobals.ai_difficulty:
+		"Easy":
+			return choose_random_move(possible_moves)
+		"Medium":
+			return choose_strategic_move(possible_moves)
+		"Hard":
+			return choose_advanced_move(possible_moves)
+			
+	# Fallback if no match
+	return choose_random_move(possible_moves)
+		
+func choose_random_move(possible_moves: Array) -> int:
+	#Easy: Just pick randomly
+	return possible_moves[randi() % possible_moves.size()]
+		
+func choose_strategic_move(possible_moves: Array) -> int:
+	#Medium: Try to get extra turns or captures
 	
-	player2_score_label = Label.new()
-	player2_score_label.text = "Score: 0"
-	player2_score_label.add_theme_font_size_override("font_size", 16)
-	player2_score_label.add_theme_color_override("font_color", Color.WHITE)
-	player2_container.add_child(player1_score_label)
+	#1. Check for moves that land in AI's store(pit 6) for extra turn
+	for move in possible_moves:
+		if simulate_move_lands_in_store(move):
+			print("AI found extra turn move!")
+			return move
 	
-	#Status message (center)
-	status_label = Label.new()
-	status_label.text = "Make your move!"
-	status_label.add_theme_font_size_override("font_size", 20)
-	status_label.add_theme_color_override("font_color", Color.YELLOW)
-	status_label.position = Vector2(300,250)
-	game_ui.add_child(status_label)
+	#2. Check for capture opportunities
+	for move in possible_moves:
+		if simulate_move_captures(move) :
+			print("AI found capture move!")
+			return move
+			
+	#3. Otherwise pick randomly
+	return choose_random_move(possible_moves)
 	
-	#Restart button
-	restart_button = Button.new()
-	restart_button.text = "New Game"
-	restart_button.position = Vector2(350, 20)
-	restart_button.size = Vector2(100, 40)
-	restart_button.pressed.connect(_on_restart_button_pressed)
-	game_ui.add_child(restart_button)
+func choose_advanced_move(possible_moves: Array) -> int:
+	#Hard: All of medium + try to block player
+	
+	#First try medium strategies
+	var strategic_move = choose_strategic_move(possible_moves)
+	if strategic_move != choose_random_move(possible_moves):
+		return strategic_move
+		
+	#TODO: Add advanced blocking logic here
+	#For now, just use strategic
+	return strategic_move
+	
+func simulate_move_lands_in_store(pit_index: int) -> bool:
+	#Simulate if this move would land the last stone in AI's store(pit 6)
+	var stones = pits[pit_index]
+	var current_pos = pit_index
+	
+	for i in stones:
+		current_pos = (current_pos + 1) % 14
+		#Skip player's store (pit 6)
+		if current_pos == 13:
+			current_pos = (current_pos + 1) % 14
+			
+	return current_pos == 6 #AI's store
+	
+func simulate_move_captures(pit_index: int) -> bool:
+	#Simulate if this move result in a capture
+	var stones = pits[pit_index]
+	var current_pos = pit_index
+	
+	#Simukate the move
+	for i in stones:
+		current_pos = (current_pos + 1) % 14
+		if current_pos == 13: #Skip player's store
+			current_pos = (current_pos + 1) % 14
+			
+	#Check if final position is on AI's side and would be empty
+	if current_pos >= 0 and current_pos <= 5:
+		#Would land in AI's side
+		if pits[current_pos] == 0: #Currently empty
+			var opposite = 12 - current_pos
+			if pits[opposite] > 0: #player has stones to capture
+				return true
+				
+	return false
+	
+	
+func _on_pause_pressed():
+	print("Pause button clicked!")
+	
+	if get_tree().paused:
+		#Resume game
+		get_tree().paused = false
+		is_paused = false
+		pause_button.text = "Pause"
+		paused_overlay.visible = false
+		show_status_message("Game Resumed", Color.WHITE)
+	else:
+		#Pause Game
+		get_tree().paused = true
+		is_paused = true
+		pause_button.text = "Resume"
+		paused_overlay.visible = true
+		show_status_message("Game Paused", Color.WHITE)
+		
+	
+func _on_new_game_pressed():
+	restart_game()
+	
 	
 func update_game_ui():
-	if not turn_label:
-		return
-	
-	#Update turn indicator
 	if game_over:
-		turn_label.text + "Game Over"
-		turn_label.add_theme_color_override("font color", Color.RED)
+		turn_label.text = "Game Over"
+		turn_label.add_theme_color_override("font_color", Color.WHITE)
 		
 	else:
 		if player_turn == 0:
-			turn_label.text = "Player 1's Turn"
-			turn_label.add_theme_color_override("font_color", Color.CYAN)
+			turn_label.text = "Player 1 Turn"
+			turn_label.add_theme_color_override("font_color", Color.WHITE)
 		else:
-			turn_label.text = "Player 2's Turn"
-			turn_label.add_theme_color_override("font_color", Color.ORANGE)
+			turn_label.text = "Player 2 Turn"
+			turn_label.add_theme_color_override("font_color", Color.WHITE)
 			
-	#Update scores
-	player1_score_label.text = "Score: " + str(pits[6])
-	player2_score_label.text = "Score: " + str(pits[13])
+	player_1_score_label.text = "Shrooms"
+	player_2_score_label.text = "Jake"
 	
-	#Clear status after a delay (unless it's game over)
-	if not game_over and status_label.text != "Make your move!":
-		var status_tween = create_tween()
-		status_tween.tween_delay(2.0)
-		status_tween.tween_callback(func(): status_label.text = "Make your move")
 		
-		
-func show_status_message(message: String, color: Color = Color.YELLOW):
-	if status_label:
-		status_label.text = message
-		status_label.add_theme_color_override("font_color", color)
+func show_status_message(message: String, color: Color = Color.WHITE):
+	status_label.text = message
+	status_label.add_theme_color_override("font_color", Color.WHITE)
+	
+	var tween = create_tween()
+	tween.tween_interval(2.0)
+	tween.tween_callback(func(): status_label.text = "Make your move")
 		
 func _on_restart_button_pressed():
 	restart_game()
 	
 #Global touch detection - this will catch ALL touches on the screen
 func _input(event): 
+	#Test pause with spacebar
+	if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
+		_on_pause_pressed()
+		
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			print("GLOBAL TOUCH DETECTED at position: ", event.position)
@@ -197,6 +292,7 @@ func connect_touchscreen_signals():
 		print(" Position: ", pit_node.global_position)
 		print(" Size: ", pit_node.size if pit_node.has_method("get_size") else "No size property")
 		
+		pit_node.process_mode = Node.PROCESS_MODE_PAUSABLE
 		
 		if pit_node is TouchScreenButton:
 			print(" TouchScreenButton properties:")
@@ -300,6 +396,10 @@ func update_board_display():
 	
 func handle_pit_click(index):
 	print("Handle pit click called for index: ", index)
+	if is_paused:
+		print("Game is paused, ignoring click")
+		return
+		
 	if game_over:
 		print("Game is over, ignoring click")
 		return
@@ -478,6 +578,7 @@ func update_single_pit_display(pit_index):
 			stone.position = Vector2(randf_range(0,30), randf_range(0,30))
 			container.add_child(stone)
 			
+#Update your complete_move function to reset AI timer
 func complete_move(final_index):
 	print ("Move completed. Final position: pit ", final_index)
 	
@@ -491,12 +592,19 @@ func complete_move(final_index):
 		print("Switching to player ", player_turn)
 	else:
 		print("Player ", player_turn, "gets another turn!")
+		show_status_message("Extra Turn", Color.WHITE)
+	
+	#Reset AI timer if it's AI's turn(AI is player 0)
+	if GameGlobals.is_ai_game() and player_turn == 0:
+		ai_timer = ai_delay
+		print("AI timer reset to: ", ai_delay)
 	
 	#Check win condition
 	check_game_over()
 	
 	#Update full board display
 	update_board_display()
+	update_game_ui()
 	
 	#Re-enable input
 	is_animating = false
@@ -525,6 +633,8 @@ func check_capture(last_index):
 	pits[player_store] += captured_stones
 	
 	print("Player", player_turn + 1, "captured", captured_stones, "stones!")
+	
+	show_status_message("Capture",  Color.WHITE)
 	
 func check_game_over():
 	#Check if player 1's side is empty (pits 0-5
@@ -558,28 +668,39 @@ func end_game():
 			pits[13] += pits[i]
 			pits[i] = 0
 			
-	#Determine winner
-	var winner = -1 #-1 = tie
-	if pits[6] > pits[13]:
-		winner = 0 #player 1 wins
-	elif pits[13] > pits[6]:
-		winner = 1 #Player 2 wins
-		
-	print("Game Over!")
-	print("Player 1 score: ", pits[6])
-	print("Player 2 score: ", pits[13])
-	if winner == -1:
-		print("It's a tie")
-	else:
-		print("Player ", winner + 1, "wins!")
+	game_over = true
+	update_board_display()
+	update_game_ui()
 	
-	game_ended.emit(winner)
+	#Determine winner
+	var player1_score = pits[6]
+	var player2_score = pits[13]
+	
+	var winner_text = ""
+	if player1_score > player2_score:
+		winner_text = "Player 1 Wins"
+	elif player2_score > player1_score:
+		winner_text = "Player 2 Wins"
+	else:
+		winner_text = "It's a TIE"
+	
+	show_status_message("Game Over \n" + winner_text, Color.WHITE)
+	new_game_button.visible = true
 	
 func restart_game():
 	pits = [4,4,4,4,4,4,0,4,4,4,4,4,4,0]
 	player_turn = 0
 	game_over = false
+	is_animating = false 
+	ai_timer = 0.0
+	
 	update_board_display()
+	update_game_ui()
+	show_status_message("New Game Started", Color.WHITE)
+	
+	#If AI game and AI goes first, set timer
+	if GameGlobals.is_ai_game() and player_turn == 0:
+		ai_timer = ai_delay
 	
 	# Individual pit functions (temporary - connect these in the editor)
 func _on_pit_0_pressed():

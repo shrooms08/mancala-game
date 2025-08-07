@@ -5,6 +5,7 @@ func _ready():
 	connect("pressed", Callable(self, "_on_pressed"))
 
 func _on_pressed():
+	print("Pressed")
 	# Get references to the ColorRect and AnimationPlayer
 	var transition = get_node("../ColorRect") # Adjust path if needed
 	var animation_player = get_node("../AnimationPlayer") # Adjust path if needed
@@ -14,7 +15,7 @@ func _on_pressed():
 	await animation_player.animation_finished
 	
 	# Load and change to the new game menu scene
-	var new_game_scene = load("res://scene/new_game_menu.tscn")
+	var new_game_scene = load("res://scene/Game Mode Selector.tscn")
 	get_tree().change_scene_to_packed(new_game_scene)
 	
 	# Optional: Play SlideOut on the new scene (if implemented there)

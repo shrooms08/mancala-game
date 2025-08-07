@@ -15,6 +15,10 @@ run/main_scene="uid://dg5obv6o4cncw"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://icon.svg"
 
+[autoload]
+
+GameGlobals="*res://Script/GameGlobals.gd"
+
 [display]
 
 window/size/viewport_width=720
@@ -22,6 +26,10 @@ window/size/viewport_height=1280
 window/stretch/mode="viewport"
 window/stretch/aspect="expand"
 window/handheld/orientation=1
+
+[dotnet]
+
+project/assembly_name="Mancala Game"
 
 [rendering]
 

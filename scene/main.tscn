@@ -1,10 +1,12 @@
-[gd_scene load_steps=19 format=3 uid="uid://c6yits07qsjhp"]
+[gd_scene load_steps=21 format=3 uid="uid://c6yits07qsjhp"]
 
 [ext_resource type="Script" uid="uid://b5fcdjnjwaac8" path="res://Script/main.gd" id="1_0ha60"]
 [ext_resource type="Texture2D" uid="uid://spdfuavmf3ws" path="res://Mancala/Mancala Board.png" id="1_brvut"]
 [ext_resource type="Texture2D" uid="uid://cjbwmx6spvs88" path="res://Mancala/Pit.png" id="3_4j5ol"]
 [ext_resource type="FontFile" uid="uid://mxhuv22vha46" path="res://Mancala/PIXBOB LITE.otf" id="4_0ha60"]
 [ext_resource type="Texture2D" uid="uid://dn2tj6ej3884g" path="res://Mancala/Store.png" id="4_p1hux"]
+[ext_resource type="Texture2D" uid="uid://bj60eeuv6tatu" path="res://Mancala/Sprite-0002.png" id="6_4j5ol"]
+[ext_resource type="Script" uid="uid://jgcniw6txcyd" path="res://Script/HoneycombManager.gd" id="7_p1hux"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_of57s"]
 bg_color = Color(0.2, 0.2, 0.2, 1)
@@ -608,8 +610,67 @@ offset_right = 20.04
 offset_bottom = 55.5
 
 [node name="Turn label" type="Label" parent="."]
+offset_left = 18.0
+offset_top = 13.0
+offset_right = 324.0
+offset_bottom = 42.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 64
+vertical_alignment = 1
+
+[node name="Player1ScoreLabel" type="Label" parent="."]
+offset_left = 607.0
+offset_top = 394.0
+offset_right = 699.0
+offset_bottom = 423.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+
+[node name="Player2ScoreLabel" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 854.0
+offset_right = 96.0
+offset_bottom = 883.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+
+[node name="StatusLabel" type="Label" parent="."]
+offset_left = 18.0
+offset_top = 77.0
+offset_right = 58.0
+offset_bottom = 106.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 32
+
+[node name="NewGameButton" type="Button" parent="."]
+offset_left = 255.0
+offset_top = 910.0
+offset_right = 487.0
+offset_bottom = 975.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 64
+text = "NEW GAME"
+
+[node name="PauseButton" type="Button" parent="."]
+process_mode = 2
+offset_left = 623.0
+offset_top = -42.0
+offset_right = 759.0
+offset_bottom = 94.0
+theme_override_fonts/font = ExtResource("4_0ha60")
+theme_override_font_sizes/font_size = 64
+icon = ExtResource("6_4j5ol")
+flat = true
+icon_alignment = 1
+
+[node name="PausedOverlay" type="Label" parent="."]
+process_mode = 2
+visible = false
 offset_right = 40.0
 offset_bottom = 23.0
+
+[node name="HoneyComb" type="HoneyComb" parent="."]
+script = ExtResource("7_p1hux")
 
 [connection signal="pressed" from="PitNodes/Pit0" to="." method="_on_pit_0_pressed"]
 [connection signal="pressed" from="PitNodes/Pit1" to="." method="_on_pit_1_pressed"]

@@ -1,0 +1,90 @@
+[gd_scene load_steps=6 format=3 uid="uid://78bf6315765x"]
+
+[ext_resource type="Script" uid="uid://82vnn5ish2ln" path="res://Script/game_mode_selector.gd" id="1_21m6k"]
+[ext_resource type="FontFile" uid="uid://mxhuv22vha46" path="res://Mancala/PIXBOB LITE.otf" id="2_3jcs1"]
+[ext_resource type="FontFile" uid="uid://ckdd6uu4s0awx" path="res://Mancala/PIXBOB LITE.ttf" id="3_tvxl4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ujdhf"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+shadow_color = Color(0.127388, 0.16854, 0.338034, 0.756863)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_67rka"]
+bg_color = Color(0.133196, 0.133196, 0.133196, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0.0383972, 0.0383972, 0.0383972, 1)
+shadow_size = 2
+shadow_offset = Vector2(0, 1.2)
+
+[node name="Game Selector" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_21m6k")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ujdhf")
+
+[node name="Game Selector" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.041
+anchor_right = 0.5
+anchor_bottom = 0.041
+offset_left = -44.0
+offset_top = -22.48
+offset_right = 44.0
+offset_bottom = 0.519997
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_3jcs1")
+theme_override_font_sizes/font_size = 50
+text = "Game Selector"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.369
+anchor_right = 0.5
+anchor_bottom = 0.369
+offset_left = -343.0
+offset_top = -133.32
+offset_right = 341.0
+offset_bottom = 150.68
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 40
+
+[node name="VsFriendButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("3_tvxl4")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/focus = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/hover = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/normal = SubResource("StyleBoxFlat_67rka")
+text = "Vs Friend"
+
+[node name="VsBotButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("3_tvxl4")
+theme_override_font_sizes/font_size = 40
+theme_override_styles/focus = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/hover = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_67rka")
+theme_override_styles/normal = SubResource("StyleBoxFlat_67rka")
+text = "Vs Bot"

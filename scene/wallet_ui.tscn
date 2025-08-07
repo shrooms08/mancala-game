@@ -1,0 +1,56 @@
+[gd_scene load_steps=5 format=3 uid="uid://dp0hp1wywvdsd"]
+
+[ext_resource type="FontFile" uid="uid://ckdd6uu4s0awx" path="res://Mancala/PIXBOB LITE.ttf" id="1_il7iu"]
+[ext_resource type="Script" uid="uid://dj7b4xgoe4x0r" path="res://Script/Wallet connect UI.gd" id="1_og3ux"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_og3ux"]
+bg_color = Color(0.2, 0.2, 0.2, 1)
+shadow_color = Color(0.127388, 0.16854, 0.338034, 0.756863)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_k54hk"]
+bg_color = Color(0.133333, 0.133333, 0.133333, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.976471)
+shadow_size = 1
+shadow_offset = Vector2(0, 3)
+
+[node name="WalletUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_og3ux")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_og3ux")
+
+[node name="ConnectButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 137.0
+offset_top = 749.0
+offset_right = 576.0
+offset_bottom = 814.0
+theme_override_fonts/font = ExtResource("1_il7iu")
+theme_override_font_sizes/font_size = 64
+theme_override_styles/focus = SubResource("StyleBoxFlat_k54hk")
+theme_override_styles/hover = SubResource("StyleBoxFlat_k54hk")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_k54hk")
+theme_override_styles/normal = SubResource("StyleBoxFlat_k54hk")
+text = "CONNECT WALLET"
+
+[node name="StatusLabel" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Not connected"
