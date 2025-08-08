@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c6yits07qsjhp"]
+[gd_scene load_steps=20 format=3 uid="uid://c6yits07qsjhp"]
 
 [ext_resource type="Script" uid="uid://b5fcdjnjwaac8" path="res://Script/main.gd" id="1_0ha60"]
 [ext_resource type="Texture2D" uid="uid://spdfuavmf3ws" path="res://Mancala/Mancala Board.png" id="1_brvut"]
@@ -6,7 +6,6 @@
 [ext_resource type="FontFile" uid="uid://mxhuv22vha46" path="res://Mancala/PIXBOB LITE.otf" id="4_0ha60"]
 [ext_resource type="Texture2D" uid="uid://dn2tj6ej3884g" path="res://Mancala/Store.png" id="4_p1hux"]
 [ext_resource type="Texture2D" uid="uid://bj60eeuv6tatu" path="res://Mancala/Sprite-0002.png" id="6_4j5ol"]
-[ext_resource type="Script" uid="uid://jgcniw6txcyd" path="res://Script/HoneycombManager.gd" id="7_p1hux"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_of57s"]
 bg_color = Color(0.2, 0.2, 0.2, 1)
@@ -670,7 +669,6 @@ offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="HoneyComb" type="HoneyComb" parent="."]
-script = ExtResource("7_p1hux")
 
 [connection signal="pressed" from="PitNodes/Pit0" to="." method="_on_pit_0_pressed"]
 [connection signal="pressed" from="PitNodes/Pit1" to="." method="_on_pit_1_pressed"]

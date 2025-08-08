@@ -1,12 +1,17 @@
+# HoneycombManager.gd - Updated with proper Honeycomb SDK integration
 extends Node
 
 # Honeycomb Integration Manager for Mancala
 # This handles all blockchain interactions via Honeycomb Protocol
 
-# Honeycomb client and project data
-var honeycomb_client
+# Honeycomb node reference (will be set from main scene)
+var honeycomb_node: Node
+var is_honeycomb_ready: bool = false
+
+# Project and wallet data
 var project_address: String = ""
-var authority_address: String = ""
+var authority_keypair_path: String = "res://id.json"
+var payer_address: String = ""
 var is_connected: bool = false
 
 # Player progression data
@@ -17,7 +22,7 @@ var active_missions: Dictionary = {}
 var completed_missions: Array = []
 var character_address: String = ""
 
-# Mission definitions
+# Mission definitions with proper structure for Honeycomb
 var missions = {
 	"first_victory": {
 		"name": "First Victory",
@@ -25,15 +30,17 @@ var missions = {
 		"target": 1,
 		"current": 0,
 		"reward_xp": 50,
-		"completed": false
+		"completed": false,
+		"mission_address": ""
 	},
 	"capture_master": {
-		"name": "Capture Master",
+		"name": "Capture Master", 
 		"description": "Capture 10 stones total",
 		"target": 10,
 		"current": 0,
 		"reward_xp": 100,
-		"completed": false
+		"completed": false,
+		"mission_address": ""
 	},
 	"extra_turn_pro": {
 		"name": "Extra Turn Pro",
@@ -41,7 +48,8 @@ var missions = {
 		"target": 5,
 		"current": 0,
 		"reward_xp": 75,
-		"completed": false
+		"completed": false,
+		"mission_address": ""
 	},
 	"ai_slayer": {
 		"name": "AI Slayer",
@@ -49,7 +57,8 @@ var missions = {
 		"target": 3,
 		"current": 0,
 		"reward_xp": 200,
-		"completed": false
+		"completed": false,
+		"mission_address": ""
 	},
 	"speed_demon": {
 		"name": "Speed Demon",
@@ -57,37 +66,14 @@ var missions = {
 		"target": 10,
 		"current": 0,
 		"reward_xp": 150,
-		"completed": false
+		"completed": false,
+		"mission_address": ""
 	}
 }
 
-# Trait definitions
-var trait_definitions = {
-	"strategist": {
-		"name": "Strategist",
-		"description": "+5% better capture detection",
-		"unlock_requirement": "win_5_games",
-		"unlocked": false
-	},
-	"speed_master": {
-		"name": "Speed Master",
-		"description": "20% faster animations",
-		"unlock_requirement": "complete_speed_demon",
-		"unlocked": false
-	},
-	"champion": {
-		"name": "Champion",
-		"description": "Special victory effects",
-		"unlock_requirement": "reach_level_10",
-		"unlocked": false
-	},
-	"ai_dominator": {
-		"name": "AI Dominator",
-		"description": "Exclusive AI slayer title",
-		"unlock_requirement": "complete_ai_slayer",
-		"unlocked": false
-	}
-}
+# Resource addresses
+var xp_resource_address: String = ""
+var character_model_address: String = ""
 
 # Signals for UI updates
 signal xp_gained(amount)
@@ -100,307 +86,392 @@ signal honeycomb_error(message)
 
 func _ready():
 	print("Honeycomb Manager initialized")
-	initialize_honeycomb()
+	# Don't initialize here, wait for honeycomb node to be set
+
+func set_honeycomb_node(node: Node):
+	"""Set the Honeycomb node reference from the main scene"""
+	honeycomb_node = node
+	if honeycomb_node:
+		print("Honeycomb node set, initializing...")
+		await initialize_honeycomb()
+	else:
+		print("ERROR: Honeycomb node is null!")
 
 func initialize_honeycomb():
+	"""Initialize Honeycomb connection and setup project"""
+	if not honeycomb_node:
+		print("ERROR: Honeycomb node not set!")
+		honeycomb_error.emit("Honeycomb node not available")
+		return
+	
 	print("Initializing Honeycomb Protocol connection...")
- 
- # Initialize Honeycomb client (replace with actual SDK initialization)
- # honeycomb_client = HoneycombClient.new() # This would be the actual SDK
- 
- # For demo purposes, simulate connection
-	await get_tree().create_timer(1.0).timeout
- 
- # Try to load existing project or create new one
+	
+	# Load the authority keypair from id.json
+	if not load_authority_keypair():
+		return
+	
+	# Check if we have an existing project or need to create one
 	if project_address == "":
 		await create_honeycomb_project()
 	else:
 		is_connected = true
 		honeycomb_connected.emit()
- 
- # Load player data (from blockchain or local for demo)
+	
+	# Setup game resources and missions
+	await setup_game_resources()
 	load_player_data()
 
+func load_authority_keypair() -> bool:
+	"""Load the authority keypair from id.json file"""
+	if not FileAccess.file_exists(authority_keypair_path):
+		print("ERROR: Authority keypair file not found at: ", authority_keypair_path)
+		honeycomb_error.emit("Keypair file not found")
+		return false
+	
+	var file = FileAccess.open(authority_keypair_path, FileAccess.READ)
+	if not file:
+		print("ERROR: Could not open keypair file")
+		honeycomb_error.emit("Could not read keypair file")
+		return false
+	
+	var keypair_data = file.get_as_text()
+	file.close()
+	
+	# Set the authority keypair in the honeycomb node
+	honeycomb_node.set_authority_keypair_from_json(keypair_data)
+	
+	# Get the public key for payer address
+	payer_address = honeycomb_node.get_authority_pubkey()
+	print("Authority loaded with pubkey: ", payer_address)
+	
+	return true
+
 func create_honeycomb_project():
+	"""Create a new Honeycomb project for the Mancala game"""
 	print("Creating Honeycomb project for Mancala...")
- 
- # For demo/testing - you'd replace this with actual wallet connection
-	authority_address = "YOUR_WALLET_ADDRESS_HERE"  # Get from connected wallet
-	var payer_address = authority_address
- 
- # This would be the actual Honeycomb client call:
-	"""
-	honeycomb_client.create_create_project_transaction(
-		authority_address,
-		"Mancala Blockchain Game",
-		"A strategic Mancala game with on-chain progression using Honeycomb Protocol",
-		["game", "mancala", "strategy", "progression"],
-		"Game",
-		false,
-		payer_address
-	)
- 
-	var response = await honeycomb_client.query_response_received
-	project_address = response.createCreateProjectTransaction.project
-	var transaction = response.createCreateProjectTransaction.tx
- 
- # Sign and send transaction
-	await send_transaction(transaction)
-	"""
- 
- # For demo purposes, simulate project creation
-	project_address = "DEMO_PROJECT_" + str(randi())
-	print("Project created with address: ", project_address)
- 
-	is_connected = true
-	honeycomb_connected.emit()
-
-func create_player_character(wallet_address: String):
-	if not is_connected:
-		print("Not connected to Honeycomb")
+	
+	if not honeycomb_node:
+		honeycomb_error.emit("Honeycomb node not available")
 		return
- 
-	print("Creating player character for wallet: ", wallet_address)
- 
- # This would use Honeycomb Characters module:
-	"""
-	honeycomb_client.create_character_transaction(
-		project_address,
-		wallet_address,
-		{
-			"name": "Mancala Player",
-			"level": 1,
-			"xp": 0
-		}
+	
+	# Create project using the Honeycomb SDK
+	var project_name = "Mancala Blockchain Game"
+	var project_description = "A strategic Mancala game with on-chain progression using Honeycomb Protocol"
+	var project_tags = ["game", "mancala", "strategy", "progression"]
+	var project_genre = "Game"
+	
+	# Call the Honeycomb SDK to create project
+	var result = await honeycomb_node.create_project(
+		project_name,
+		project_description,
+		project_tags,
+		project_genre,
+		false  # not compressed
 	)
- 
-	var response = await honeycomb_client.query_response_received
-	character_address = response.createCharacterTransaction.character
-	"""
- 
- # Demo simulation
-	character_address = "DEMO_CHAR_" + str(randi())
-	print("Character created: ", character_address)
+	
+	if result.success:
+		project_address = result.project_address
+		print("Project created successfully: ", project_address)
+		is_connected = true
+		honeycomb_connected.emit()
+		save_project_data()
+	else:
+		print("ERROR: Failed to create project: ", result.error)
+		honeycomb_error.emit("Failed to create project: " + str(result.error))
 
-func setup_xp_resource():
+func setup_game_resources():
+	"""Setup XP resource, character model, and missions"""
 	if not is_connected:
 		return
-  
-	print("Setting up XP resource...")
- 
- # This would create the XP resource type in Honeycomb:
-	"""
-	honeycomb_client.create_resource_transaction(
+	
+	print("Setting up game resources...")
+	
+	# Create XP resource
+	await create_xp_resource()
+	
+	# Create character model for players
+	await create_character_model()
+	
+	# Setup missions
+	await setup_missions()
+
+func create_xp_resource():
+	"""Create the XP resource for player progression"""
+	print("Creating XP resource...")
+	
+	var resource_params = {
+		"name": "Experience Points",
+		"symbol": "XP",
+		"uri": "",  # Could add metadata URI
+		"decimals": 0
+	}
+	
+	var result = await honeycomb_node.create_resource(
 		project_address,
-		authority_address,
-		{
-			"name": "Experience Points",
-			"symbol": "XP",
-			"decimals": 0,
-			"max_supply": null
-		}
+		resource_params
 	)
-	"""
- 
-	print("XP resource configured")
+	
+	if result.success:
+		xp_resource_address = result.resource_address
+		print("XP resource created: ", xp_resource_address)
+	else:
+		print("ERROR: Failed to create XP resource: ", result.error)
+
+func create_character_model():
+	"""Create character model for player characters"""
+	print("Creating character model...")
+	
+	var character_config = {
+		"name": "Mancala Player",
+		"symbol": "MPLAYER",
+		"description": "A Mancala game player character",
+		"uri": ""  # Could add character metadata URI
+	}
+	
+	var result = await honeycomb_node.create_character_model(
+		project_address,
+		character_config
+	)
+	
+	if result.success:
+		character_model_address = result.character_model_address
+		print("Character model created: ", character_model_address)
+	else:
+		print("ERROR: Failed to create character model: ", result.error)
 
 func setup_missions():
-	if not is_connected:
-		return
-  
-	print("Setting up missions in Honeycomb...")
- 
- # This would use Honeycomb Missions module:
+	"""Create missions in the Honeycomb system"""
+	print("Setting up missions...")
+	
 	for mission_id in missions:
-		var mission = missions[mission_id]
-		print("Creating mission: ", mission.name)
-  
-		"""
-		honeycomb_client.create_mission_transaction(
-			project_address,
-			authority_address,
-			{
-				"name": mission.name,
-				"description": mission.description,
-				"requirements": {
-					"target": mission.target
-				},
-				"rewards": {
-					"xp": mission.reward_xp
-				}
+		var mission_data = missions[mission_id]
+		
+		var mission_config = {
+			"name": mission_data.name,
+			"description": mission_data.description,
+			"reward": {
+				"resource_address": xp_resource_address,
+				"amount": mission_data.reward_xp
 			}
+		}
+		
+		var result = await honeycomb_node.create_mission(
+			project_address,
+			mission_config
 		)
-		"""
+		
+		if result.success:
+			missions[mission_id]["mission_address"] = result.mission_address
+			print("Mission created: ", mission_data.name, " -> ", result.mission_address)
+		else:
+			print("ERROR: Failed to create mission ", mission_data.name, ": ", result.error)
+
+func create_player_character(wallet_address: String = ""):
+	"""Create a character for the current player"""
+	if not is_connected:
+		print("Not connected to Honeycomb")
+		return null
+	
+	var player_wallet = wallet_address if wallet_address != "" else payer_address
+	print("Creating player character for wallet: ", player_wallet)
+	
+	var character_data = {
+		"wallet": player_wallet,
+		"name": "Mancala Player",
+		"attributes": {
+			"level": 1,
+			"xp": 0,
+			"games_played": 0,
+			"games_won": 0
+		}
+	}
+	
+	var result = await honeycomb_node.create_character(
+		project_address,
+		character_model_address,
+		character_data
+	)
+	
+	if result.success:
+		character_address = result.character_address
+		print("Character created: ", character_address)
+		return result
+	else:
+		print("ERROR: Failed to create character: ", result.error)
+		return null
 
 func grant_xp(amount: int, reason: String):
+	"""Grant XP to player both locally and on-chain"""
 	print("Granting ", amount, " XP for: ", reason)
- 
+	
 	var old_level = calculate_level(player_xp)
 	player_xp += amount
 	var new_level = calculate_level(player_xp)
- 
- # Update XP resource on-chain via Honeycomb
-	if is_connected:
-		update_xp_resource(player_xp)
- 
+	
+	# Update XP on-chain if connected
+	if is_connected and character_address != "":
+		update_xp_on_chain(player_xp)
+	
 	xp_gained.emit(amount)
- 
+	
 	if new_level > old_level:
 		player_level = new_level
 		level_up.emit(new_level)
 		check_trait_unlocks()
 
-func update_xp_resource(total_xp: int):
-	if not is_connected:
+func update_xp_on_chain(total_xp: int):
+	"""Update player's XP resource on the blockchain"""
+	if not is_connected or xp_resource_address == "" or character_address == "":
 		return
-  
-	print("Updating XP resource on-chain: ", total_xp)
- 
- # This would use Honeycomb Resources to update player's XP:
-	"""
-	honeycomb_client.update_resource_transaction(
+	
+	print("Updating XP on-chain: ", total_xp)
+	
+	var result = await honeycomb_node.mint_resource_to_character(
 		character_address,
-		"XP",
+		xp_resource_address,
 		total_xp
 	)
-	"""
+	
+	if result.success:
+		print("XP updated on-chain successfully")
+	else:
+		print("ERROR: Failed to update XP on-chain: ", result.error)
 
 func progress_mission(mission_id: String, amount: int = 1):
+	"""Progress a mission both locally and on-chain"""
 	if missions.has(mission_id) and not missions[mission_id]["completed"]:
 		missions[mission_id]["current"] += amount
 		var current = missions[mission_id]["current"]
 		var target = missions[mission_id]["target"]
-  
+		
 		print("Mission progress - ", mission_id, ": ", current, "/", target)
 		mission_progress.emit(mission_id, current, target)
-  
+		
 		if current >= target:
 			complete_mission(mission_id)
 
 func complete_mission(mission_id: String):
+	"""Complete a mission and grant rewards"""
 	if missions.has(mission_id) and not missions[mission_id]["completed"]:
 		missions[mission_id]["completed"] = true
 		var reward_xp = missions[mission_id]["reward_xp"]
-  
+		
 		print("Mission completed: ", missions[mission_id]["name"])
 		mission_completed.emit(mission_id, reward_xp)
-  
-  # Grant reward XP
+		
+		# Grant reward XP
 		grant_xp(reward_xp, "Mission: " + missions[mission_id]["name"])
-  
-  # Complete mission on-chain via Honeycomb Missions
-		if is_connected:
+		
+		# Complete mission on-chain
+		if is_connected and missions[mission_id]["mission_address"] != "":
 			complete_mission_on_chain(mission_id)
 
 func complete_mission_on_chain(mission_id: String):
+	"""Mark mission as completed on the blockchain"""
+	var mission_address = missions[mission_id]["mission_address"]
+	if mission_address == "":
+		return
+	
 	print("Completing mission on-chain: ", mission_id)
- 
- # This would use Honeycomb Missions module:
-	"""
-	honeycomb_client.complete_mission_transaction(
+	
+	var result = await honeycomb_node.participate_in_mission(
 		character_address,
-		mission_id
+		mission_address
 	)
-	"""
-
-func unlock_trait(trait_id: String):
-	if trait_definitions.has(trait_id) and not trait_definitions[trait_id]["unlocked"]:
-		trait_definitions[trait_id]["unlocked"] = true
-		player_traits.append(trait_id)
-  
-		print("Trait unlocked: ", trait_definitions[trait_id]["name"])
-		trait_unlocked.emit(trait_id)
-  
-  # Mint trait NFT via Honeycomb Characters/Traits
-		if is_connected:
-			mint_trait_on_chain(trait_id)
-
-
-func mint_trait_on_chain(trait_id: String):
-	print("Minting trait on-chain: ", trait_id)
- 
- # This would use Honeycomb to mint trait as character attribute:
-	"""
-	honeycomb_client.add_character_trait_transaction(
-		character_address,
-		{
-			"trait_id": trait_id,
-			"name": trait_definitions[trait_id]["name"],
-			"description": trait_definitions[trait_id]["description"]
-		}
-	)
-	"""
-
-func check_trait_unlocks():
- # Check if any traits should be unlocked
-	for trait_id in trait_definitions:
-		var trait_data = trait_definitions[trait_id]
-		if not trait_data["unlocked"]:
-			match trait_data["unlock_requirement"]:
-				"win_5_games":
-					if missions["first_victory"]["current"] >= 5:  # Simplified check
-						unlock_trait(trait_id)
-				"complete_speed_demon":
-					if missions["speed_demon"]["completed"]:
-						unlock_trait(trait_id)
-				"reach_level_10":
-					if player_level >= 10:
-						unlock_trait(trait_id)
-				"complete_ai_slayer":
-					if missions["ai_slayer"]["completed"]:
-						unlock_trait(trait_id)
+	
+	if result.success:
+		print("Mission completed on-chain successfully")
+	else:
+		print("ERROR: Failed to complete mission on-chain: ", result.error)
 
 func calculate_level(xp: int) -> int:
- # XP curve: Level = sqrt(XP/100) + 1
+	"""Calculate level from XP using square root progression"""
 	return int(sqrt(xp / 100.0)) + 1
 
 func get_xp_for_level(level: int) -> int:
- # Reverse calculation
+	"""Calculate XP required for a specific level"""
 	return (level - 1) * (level - 1) * 100
 
 func get_player_stats() -> Dictionary:
+	"""Get current player statistics"""
 	return {
 		"xp": player_xp,
 		"level": player_level,
 		"traits": player_traits,
-		"missions": missions
+		"missions": missions,
+		"character_address": character_address,
+		"project_address": project_address
 	}
 
-# GAME EVENT HANDLERS
-# These are called from your Mancala game
+# GAME EVENT HANDLERS - Called from your Mancala game
 
 func on_game_won(vs_ai: bool, ai_difficulty: String = ""):
+	"""Handle game victory event"""
 	var base_xp = 100
 	var bonus_xp = 0
- 
+	
 	if vs_ai:
 		match ai_difficulty:
-			"Easy": bonus_xp = 10
-			"Medium": bonus_xp = 25
+			"Easy": 
+				bonus_xp = 10
+			"Medium": 
+				bonus_xp = 25
 			"Hard":
 				bonus_xp = 50
 				progress_mission("ai_slayer")
- 
+	
 	grant_xp(base_xp + bonus_xp, "Game Victory" + (" vs AI (" + ai_difficulty + ")" if vs_ai else ""))
 	progress_mission("first_victory")
 
 func on_stones_captured(stone_count: int):
+	"""Handle stone capture event"""
 	var xp_per_stone = 5
 	grant_xp(stone_count * xp_per_stone, "Captured " + str(stone_count) + " stones")
 	progress_mission("capture_master", stone_count)
 
 func on_extra_turn():
+	"""Handle extra turn event"""
 	grant_xp(10, "Extra turn")
 	progress_mission("extra_turn_pro")
 
 func on_fast_move(move_time: float):
+	"""Handle fast move event"""
 	if move_time < 5.0:
 		progress_mission("speed_demon")
 
 # DATA PERSISTENCE
+
+func save_project_data():
+	"""Save project and connection data"""
+	var data = {
+		"project_address": project_address,
+		"character_address": character_address,
+		"xp_resource_address": xp_resource_address,
+		"character_model_address": character_model_address
+	}
+	
+	var file = FileAccess.open("user://honeycomb_project.json", FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(data))
+		file.close()
+
+func load_project_data():
+	"""Load project and connection data"""
+	var file = FileAccess.open("user://honeycomb_project.json", FileAccess.READ)
+	if file:
+		var json_string = file.get_as_text()
+		file.close()
+		var json = JSON.new()
+		var parse_result = json.parse(json_string)
+		if parse_result == OK:
+			var data = json.get_data()
+			project_address = data.get("project_address", "")
+			character_address = data.get("character_address", "")
+			xp_resource_address = data.get("xp_resource_address", "")
+			character_model_address = data.get("character_model_address", "")
+
 func save_player_data():
- # TODO: This would save to blockchain via Honeycomb
- # For now, use local storage
+	"""Save player progression data"""
 	var data = get_player_stats()
 	var file = FileAccess.open("user://player_data.json", FileAccess.WRITE)
 	if file:
@@ -408,6 +479,7 @@ func save_player_data():
 		file.close()
 
 func load_player_data():
+	"""Load player progression data"""
 	var file = FileAccess.open("user://player_data.json", FileAccess.READ)
 	if file:
 		var json_string = file.get_as_text()
@@ -419,12 +491,25 @@ func load_player_data():
 			player_xp = data.get("xp", 0)
 			player_level = data.get("level", 1)
 			player_traits = data.get("traits", [])
-   # Load missions progress
+			
+			# Load missions progress
 			var saved_missions = data.get("missions", {})
 			for mission_id in saved_missions:
 				if missions.has(mission_id):
 					missions[mission_id]["current"] = saved_missions[mission_id].get("current", 0)
 					missions[mission_id]["completed"] = saved_missions[mission_id].get("completed", false)
 
+func unlock_trait(trait_id: String):
+	"""Unlock a trait for the player"""
+	# Implementation for trait system
+	pass
+
+func check_trait_unlocks():
+	"""Check if any traits should be unlocked based on progress"""
+	# Implementation for trait checking
+	pass
+
 func _exit_tree():
+	"""Save data when exiting"""
 	save_player_data()
+	save_project_data()
