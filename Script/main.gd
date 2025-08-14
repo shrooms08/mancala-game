@@ -11,11 +11,11 @@ var vs_ai: bool = false #true = play against AI, false = play with friend
 var ai_delay := 0.5
 var ai_timer := 0.0 
 
-# Game statistics tracking for Honeycomb
+# Game statistics tracking for Honeycomb - FIXED: Changed float to Dictionary
 var stones_captured_this_game: int = 0
 var extra_turns_this_game: int = 0
-var game_start_time: float = 0.0
-var last_move_time: float = 0.0
+var game_start_time: Dictionary = {} # Changed from float to Dictionary
+var last_move_time: Dictionary = {}   # Changed from float to Dictionary
 
 @onready var turn_label: Label = $"Turn label"
 @onready var player_1_score_label: Label = $Player1ScoreLabel
@@ -24,7 +24,7 @@ var last_move_time: float = 0.0
 @onready var new_game_button: Button = $NewGameButton
 @onready var pause_button: Button = $PauseButton
 @onready var paused_overlay: Label = $PausedOverlay
-@onready var honeycomb_node: Node = $HoneyComb  # Reference to the Honeycomb node
+@onready var honey_comb: HoneyComb = $HoneyComb
 
 # Reference to the HoneycombManager autoload
 var honeycomb_manager: Node
@@ -32,16 +32,17 @@ var honeycomb_manager: Node
 signal game_ended(winner)
 
 func _ready():
-	randomize()
+	print("Main ready called")
+	#randomize()
 	print("Game starting...")
 	
 	# Get reference to HoneycombManager autoload (you'll need to add this to autoload)
 	honeycomb_manager = get_node("/root/HoneycombManager")
 	
 	# Set up Honeycomb integration
-	if honeycomb_node and honeycomb_manager:
+	if honey_comb and honeycomb_manager:
 		print("Setting up Honeycomb integration...")
-		honeycomb_manager.set_honeycomb_node(honeycomb_node)
+		honeycomb_manager.set_honeycomb_node(honey_comb)
 		
 		# Connect to Honeycomb signals
 		honeycomb_manager.honeycomb_connected.connect(_on_honeycomb_connected)
@@ -83,10 +84,11 @@ func _ready():
 		vs_ai = false
 		player_1_score_label.text = "Player 1: " + str(pits[6])
 	
-	# Initialize game tracking
+	# Initialize game tracking - FIXED: Proper Dictionary initialization
 	game_start_time = Time.get_time_dict_from_system()
 	stones_captured_this_game = 0
 	extra_turns_this_game = 0
+	last_move_time = {} # Initialize as empty Dictionary
 	
 	if GameGlobals.is_ai_game() and player_turn == 0:
 		ai_timer = ai_delay

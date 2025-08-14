@@ -160,4 +160,6 @@ libraries = {
 &"": SubResource("AnimationLibrary_0iwki")
 }
 
+[node name="HoneyComb" type="HoneyComb" parent="."]
+
 [connection signal="pressed" from="Play Game" to="Play Game" method="_on_pressed"]

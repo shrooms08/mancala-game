@@ -1,16 +1,17 @@
 # HoneycombManager.gd - Updated with proper Honeycomb SDK integration
 extends Node
 
+var honeycomb_node: HoneyComb
 # Honeycomb Integration Manager for Mancala
 # This handles all blockchain interactions via Honeycomb Protocol
 
+
 # Honeycomb node reference (will be set from main scene)
-var honeycomb_node: Node
 var is_honeycomb_ready: bool = false
 
 # Project and wallet data
 var project_address: String = ""
-var authority_keypair_path: String = "res://id.json"
+var authority: Keypair
 var payer_address: String = ""
 var is_connected: bool = false
 
@@ -88,96 +89,67 @@ func _ready():
 	print("Honeycomb Manager initialized")
 	# Don't initialize here, wait for honeycomb node to be set
 
-func set_honeycomb_node(node: Node):
-	"""Set the Honeycomb node reference from the main scene"""
+func set_honeycomb_node(node: HoneyComb):
+	print("Honeycomb Manager initialized")
+	
+	# Set Honeycomb node
 	honeycomb_node = node
+	honeycomb_node.set_honeycomb_url("https://edge.test.honeycombprotocol.com")
+	
 	if honeycomb_node:
 		print("Honeycomb node set, initializing...")
-		await initialize_honeycomb()
+		
+		# Initialize Honeycomb
+		print("Initializing Honeycomb Protocol connection...")
+		
+		# Load the authority keypair from id.json
+		authority = Keypair.new_from_file("res://id.json")
+		payer_address = authority.get_public_string()
+		
+		# Check if we have an existing project or need to create one
+		if project_address == "":
+			print("Creating Honeycomb project for Mancala...")
+			
+			var project_name = "Mancala Blockchain Game"
+			var project_description = "A strategic Mancala game with on-chain progression using Honeycomb Protocol"
+			var project_tags = ["game", "mancala", "strategy", "progression"]
+			var project_genre = "Game"
+			
+			honeycomb_node.create_create_project_transaction(
+				payer_address,
+				project_name,
+				project_description,
+				project_tags
+			)
+			print("done calling honeycomb project create")
+			var response = await honeycomb_node.query_response_received
+			print(response)
+			
+			var project_address = response.createCreateProjectTransaction.project
+			print(project_address)
+
+			var transaction = response.createCreateProjectTransaction.tx
+			print(transaction)
+			
+			if response.success:
+				project_address = response.project_address
+				print("Project created successfully: ", project_address)
+				is_connected = true
+				honeycomb_connected.emit()
+				save_project_data()
+			else:
+				print("ERROR: Failed to create project: ", response.error)
+				honeycomb_error.emit("Failed to create project: " + str(response.error))
+		else:
+			is_connected = true
+			honeycomb_connected.emit()
+		
+		# Setup game resources and missions
+		await setup_game_resources()
+		load_player_data()
 	else:
 		print("ERROR: Honeycomb node is null!")
-
-func initialize_honeycomb():
-	"""Initialize Honeycomb connection and setup project"""
-	if not honeycomb_node:
-		print("ERROR: Honeycomb node not set!")
 		honeycomb_error.emit("Honeycomb node not available")
-		return
-	
-	print("Initializing Honeycomb Protocol connection...")
-	
-	# Load the authority keypair from id.json
-	if not load_authority_keypair():
-		return
-	
-	# Check if we have an existing project or need to create one
-	if project_address == "":
-		await create_honeycomb_project()
-	else:
-		is_connected = true
-		honeycomb_connected.emit()
-	
-	# Setup game resources and missions
-	await setup_game_resources()
-	load_player_data()
-
-func load_authority_keypair() -> bool:
-	"""Load the authority keypair from id.json file"""
-	if not FileAccess.file_exists(authority_keypair_path):
-		print("ERROR: Authority keypair file not found at: ", authority_keypair_path)
-		honeycomb_error.emit("Keypair file not found")
-		return false
-	
-	var file = FileAccess.open(authority_keypair_path, FileAccess.READ)
-	if not file:
-		print("ERROR: Could not open keypair file")
-		honeycomb_error.emit("Could not read keypair file")
-		return false
-	
-	var keypair_data = file.get_as_text()
-	file.close()
-	
-	# Set the authority keypair in the honeycomb node
-	honeycomb_node.set_authority_keypair_from_json(keypair_data)
-	
-	# Get the public key for payer address
-	payer_address = honeycomb_node.get_authority_pubkey()
-	print("Authority loaded with pubkey: ", payer_address)
-	
-	return true
-
-func create_honeycomb_project():
-	"""Create a new Honeycomb project for the Mancala game"""
-	print("Creating Honeycomb project for Mancala...")
-	
-	if not honeycomb_node:
-		honeycomb_error.emit("Honeycomb node not available")
-		return
-	
-	# Create project using the Honeycomb SDK
-	var project_name = "Mancala Blockchain Game"
-	var project_description = "A strategic Mancala game with on-chain progression using Honeycomb Protocol"
-	var project_tags = ["game", "mancala", "strategy", "progression"]
-	var project_genre = "Game"
-	
-	# Call the Honeycomb SDK to create project
-	var result = await honeycomb_node.create_project(
-		project_name,
-		project_description,
-		project_tags,
-		project_genre,
-		false  # not compressed
-	)
-	
-	if result.success:
-		project_address = result.project_address
-		print("Project created successfully: ", project_address)
-		is_connected = true
-		honeycomb_connected.emit()
-		save_project_data()
-	else:
-		print("ERROR: Failed to create project: ", result.error)
-		honeycomb_error.emit("Failed to create project: " + str(result.error))
 
 func setup_game_resources():
 	"""Setup XP resource, character model, and missions"""
