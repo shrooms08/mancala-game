@@ -211,11 +211,70 @@
           "completed": false
         }
       }
+    },
+    "test_wallet_12345678901234567890123456789012": {
+      "id": "test_wallet_12345678901234567890123456789012",
+      "userPubkey": "test_wallet_12345678901234567890123456789012",
+      "username": "TestPlayer",
+      "displayName": "Test Player",
+      "avatar": "",
+      "gameMode": "PVP",
+      "aiDifficulty": "Medium",
+      "honeycombProfile": null,
+      "createdAt": "2025-08-15T19:05:33.064Z",
+      "lastSeen": "2025-08-15T19:05:33.064Z",
+      "stats": {
+        "gamesPlayed": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "totalXP": 0,
+        "currentLevel": 1,
+        "stonesCaptured": 0,
+        "extraTurns": 0,
+        "fastMoves": 0,
+        "missionsCompleted": 0,
+        "totalPlayTime": 0
+      },
+      "achievements": {
+        "firstVictory": false,
+        "captureMaster": false,
+        "extraTurnPro": false,
+        "aiSlayer": false,
+        "speedDemon": false
+      },
+      "missions": {
+        "firstVictory": {
+          "current": 0,
+          "target": 1,
+          "completed": false
+        },
+        "captureMaster": {
+          "current": 0,
+          "target": 10,
+          "completed": false
+        },
+        "extraTurnPro": {
+          "current": 0,
+          "target": 5,
+          "completed": false
+        },
+        "aiSlayer": {
+          "current": 0,
+          "target": 3,
+          "completed": false
+        },
+        "speedDemon": {
+          "current": 0,
+          "target": 10,
+          "completed": false
+        }
+      }
     }
   },
   "usersList": [
     "test_user_12345678901234567890123456789012",
     "user_1755268950_1234",
-    "placeholder_wallet_address_12345678901234567890123456789012"
+    "placeholder_wallet_address_12345678901234567890123456789012",
+    "test_wallet_12345678901234567890123456789012"
   ]
 }

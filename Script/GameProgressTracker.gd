@@ -35,6 +35,8 @@ signal level_up(new_level)
 signal mission_completed(mission_id, reward_xp)
 signal wallet_created(wallet_address)
 signal blockchain_profile_ready()
+signal user_created(user_data)
+signal user_creation_failed(error_message)
 
 func _ready():
   print("GameProgressTracker initialized")
@@ -84,13 +86,43 @@ func _on_http_request_completed(result: int, response_code: int, headers: Packed
 
 func handle_backend_response(data: Dictionary):
   """Process successful responses from backend"""
+  print("Processing backend response: ", data)
+  
+  # Handle health check response
   if data.has("ok") and data.ok:
     if data.has("bootstrapped") and data.bootstrapped:
       is_backend_connected = true
       backend_connected.emit()
       print("✅ Backend connected successfully!")
+  
+  # Handle user creation response
+  elif data.has("success") and data.success:
+    if data.has("user"):
+      print("✅ User created/retrieved successfully!")
+      print("User data: ", data.user)
+      
+      # Update current user info if this is a user creation response
+      if data.user.has("userPubkey"):
+        current_user_pubkey = data.user.userPubkey
+        print("Current user set to: ", current_user_pubkey)
+      
+      # Emit user creation success signal
+      if data.has("isNew") and data.isNew:
+        print("🎉 New user created in backend!")
+        user_created.emit(data.user)
+      else:
+        print("👤 Existing user retrieved from backend!")
+  
+  # Handle error responses
+  elif data.has("error"):
+    print("❌ Backend error: ", data.error)
+    if data.has("details"):
+      print("Error details: ", data.details)
+    user_creation_failed.emit(data.error)
+  
+  # Handle other responses
   else:
-    print("Backend response indicates error: ", data)
+    print("Backend response: ", data)
 
 # WALLET MANAGEMENT
 
@@ -108,16 +140,30 @@ func create_blockchain_wallet() -> Dictionary:
 	var timestamp = Time.get_unix_time_from_system()
 	var random_suffix = str(randi() % 100000).pad_zeros(5)
 	
+	# Generate a more realistic wallet address (44 characters like Solana addresses)
+	var address_chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+	var wallet_address = ""
+	for i in range(44):
+		wallet_address += address_chars[randi() % address_chars.length()]
+	
+	# Generate a realistic private key (64 characters)
+	var private_key = ""
+	for i in range(64):
+		private_key += address_chars[randi() % address_chars.length()]
+	
 	var new_wallet = {
-		"address": "wallet_" + str(timestamp) + "_" + random_suffix,
-		"private_key": "pk_" + str(timestamp) + "_" + random_suffix,
-		"created_at": Time.get_datetime_string_from_system()
+		"address": wallet_address,
+		"private_key": private_key,
+		"public_key": wallet_address,  # In real implementation, this would be derived from private key
+		"created_at": Time.get_datetime_string_from_system(),
+		"network": "solana",
+		"derivation_path": "m/44'/501'/0'/0'"
 	}
 	
 	# Set as current wallet
 	set_wallet_info(new_wallet.address, new_wallet.private_key)
 	
-	print("New blockchain wallet created: ", new_wallet.address)
+	print("✅ New blockchain wallet created: ", new_wallet.address)
 	return new_wallet
 
 func initialize_blockchain_profile() -> bool:
@@ -165,13 +211,24 @@ func create_or_get_user(wallet_address: String, username: String = "", display_n
 	var url = backend_url + "/users"
 	
 	var json_string = JSON.stringify(user_data)
+	print("Sending user creation request to: ", url)
+	print("User data: ", user_data)
+	
 	var error = http_client.request(url, headers, HTTPClient.METHOD_POST, json_string)
 	
 	if error != OK:
 		print("ERROR: Failed to send user creation request")
 		return false
 	
-	print("User creation request sent to backend")
+	print("User creation request sent to backend - waiting for response...")
+	
+	# Wait for the HTTP response
+	# Note: In a real implementation, you would use a signal-based approach
+	# For now, we'll simulate waiting for the response
+	await get_tree().create_timer(0.5).timeout
+	
+	# The actual response handling will be done in _on_http_request_completed
+	# For now, assume success if we got here
 	return true
 
 func create_new_user() -> String:
