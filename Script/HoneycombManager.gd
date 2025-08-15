@@ -1,19 +1,11 @@
-# HoneycombManager.gd - Updated with proper Honeycomb SDK integration
+# HoneycombManager.gd - Updated to connect to Node.js Backend
 extends Node
 
-var honeycomb_node: HoneyComb
-# Honeycomb Integration Manager for Mancala
-# This handles all blockchain interactions via Honeycomb Protocol
-
-
-# Honeycomb node reference (will be set from main scene)
-var is_honeycomb_ready: bool = false
-
-# Project and wallet data
+# Backend configuration
+var backend_config: BackendConfig
+var backend_url: String = "http://localhost:8080"
+var is_backend_connected: bool = false
 var project_address: String = ""
-var authority: Keypair
-var payer_address: String = ""
-var is_connected: bool = false
 
 # Player progression data
 var player_xp: int = 0
@@ -22,8 +14,9 @@ var player_traits: Array = []
 var active_missions: Dictionary = {}
 var completed_missions: Array = []
 var character_address: String = ""
+var user_profile_address: String = ""
 
-# Mission definitions with proper structure for Honeycomb
+# Mission definitions
 var missions = {
 	"first_victory": {
 		"name": "First Victory",
@@ -31,8 +24,7 @@ var missions = {
 		"target": 1,
 		"current": 0,
 		"reward_xp": 50,
-		"completed": false,
-		"mission_address": ""
+		"completed": false
 	},
 	"capture_master": {
 		"name": "Capture Master", 
@@ -40,8 +32,7 @@ var missions = {
 		"target": 10,
 		"current": 0,
 		"reward_xp": 100,
-		"completed": false,
-		"mission_address": ""
+		"completed": false
 	},
 	"extra_turn_pro": {
 		"name": "Extra Turn Pro",
@@ -49,8 +40,7 @@ var missions = {
 		"target": 5,
 		"current": 0,
 		"reward_xp": 75,
-		"completed": false,
-		"mission_address": ""
+		"completed": false
 	},
 	"ai_slayer": {
 		"name": "AI Slayer",
@@ -58,8 +48,7 @@ var missions = {
 		"target": 3,
 		"current": 0,
 		"reward_xp": 200,
-		"completed": false,
-		"mission_address": ""
+		"completed": false
 	},
 	"speed_demon": {
 		"name": "Speed Demon",
@@ -67,14 +56,14 @@ var missions = {
 		"target": 10,
 		"current": 0,
 		"reward_xp": 150,
-		"completed": false,
-		"mission_address": ""
+		"completed": false
 	}
 }
 
-# Resource addresses
-var xp_resource_address: String = ""
-var character_model_address: String = ""
+# HTTP client for backend communication
+var http_client: HTTPRequest
+var connection_retry_count: int = 0
+var max_retries: int = 3
 
 # Signals for UI updates
 signal xp_gained(amount)
@@ -82,207 +71,141 @@ signal level_up(new_level)
 signal mission_progress(mission_id, current, target)
 signal mission_completed(mission_id, reward_xp)
 signal trait_unlocked(trait_id)
-signal honeycomb_connected()
-signal honeycomb_error(message)
+signal backend_connected()
+signal backend_error(message)
 
 func _ready():
-	print("Honeycomb Manager initialized")
-	# Don't initialize here, wait for honeycomb node to be set
-
-func set_honeycomb_node(node: HoneyComb):
-	print("Honeycomb Manager initialized")
+	print("Honeycomb Manager initialized - Backend Mode")
 	
-	# Set Honeycomb node
-	honeycomb_node = node
-	honeycomb_node.set_honeycomb_url("https://edge.test.honeycombprotocol.com")
+	# Load backend configuration
+	load_backend_config()
 	
-	if honeycomb_node:
-		print("Honeycomb node set, initializing...")
-		
-		# Initialize Honeycomb
-		print("Initializing Honeycomb Protocol connection...")
-		
-		# Load the authority keypair from id.json
-		authority = Keypair.new_from_file("res://id.json")
-		payer_address = authority.get_public_string()
-		
-		# Check if we have an existing project or need to create one
-		if project_address == "":
-			print("Creating Honeycomb project for Mancala...")
-			
-			var project_name = "Mancala Blockchain Game"
-			var project_description = "A strategic Mancala game with on-chain progression using Honeycomb Protocol"
-			var project_tags = ["game", "mancala", "strategy", "progression"]
-			var project_genre = "Game"
-			
-			honeycomb_node.create_create_project_transaction(
-				payer_address,
-				project_name,
-				project_description,
-				project_tags
-			)
-			print("done calling honeycomb project create")
-			var response = await honeycomb_node.query_response_received
-			print(response)
-			
-			var project_address = response.createCreateProjectTransaction.project
-			print(project_address)
+	http_client = HTTPRequest.new()
+	add_child(http_client)
+	http_client.request_completed.connect(_on_http_request_completed)
+	
+	# Try to connect to backend
+	connect_to_backend()
 
-			var transaction = response.createCreateProjectTransaction.tx
-			print(transaction)
-			
-			if response.success:
-				project_address = response.project_address
-				print("Project created successfully: ", project_address)
-				is_connected = true
-				honeycomb_connected.emit()
-				save_project_data()
-			else:
-				print("ERROR: Failed to create project: ", response.error)
-				honeycomb_error.emit("Failed to create project: " + str(response.error))
-		else:
-			is_connected = true
-			honeycomb_connected.emit()
-		
-		# Setup game resources and missions
-		await setup_game_resources()
-		load_player_data()
-	else:
-		print("ERROR: Honeycomb node is null!")
-		honeycomb_error.emit("Honeycomb node not available")
+func load_backend_config():
+	"""Load backend configuration from resource file"""
+	backend_config = BackendConfig.new()
+	backend_url = backend_config.get_full_backend_url()
+	print("Backend URL configured: ", backend_url)
 
-func setup_game_resources():
-	"""Setup XP resource, character model, and missions"""
-	if not is_connected:
+func connect_to_backend():
+	"""Connect to the Node.js backend server"""
+	print("Connecting to backend at: ", backend_url)
+	
+	# Test backend connection with health check
+	var headers = ["Content-Type: application/json"]
+	var url = backend_config.get_health_check_url()
+	
+	var error = http_client.request(url, headers, HTTPClient.METHOD_GET)
+	if error != OK:
+		print("ERROR: Failed to send health check request")
+		backend_error.emit("Failed to connect to backend")
 		return
 	
-	print("Setting up game resources...")
-	
-	# Create XP resource
-	await create_xp_resource()
-	
-	# Create character model for players
-	await create_character_model()
-	
-	# Setup missions
-	await setup_missions()
+	print("Health check request sent to backend")
 
-func create_xp_resource():
-	"""Create the XP resource for player progression"""
-	print("Creating XP resource...")
-	
-	var resource_params = {
-		"name": "Experience Points",
-		"symbol": "XP",
-		"uri": "",  # Could add metadata URI
-		"decimals": 0
-	}
-	
-	var result = await honeycomb_node.create_resource(
-		project_address,
-		resource_params
-	)
-	
-	if result.success:
-		xp_resource_address = result.resource_address
-		print("XP resource created: ", xp_resource_address)
+func retry_connection():
+	"""Retry backend connection with exponential backoff"""
+	if connection_retry_count < max_retries:
+		connection_retry_count += 1
+		var delay = pow(2, connection_retry_count) # Exponential backoff: 2, 4, 8 seconds
+		print("Retrying backend connection in ", delay, " seconds... (attempt ", connection_retry_count, "/", max_retries, ")")
+		
+		var timer = get_tree().create_timer(delay)
+		await timer.timeout
+		connect_to_backend()
 	else:
-		print("ERROR: Failed to create XP resource: ", result.error)
+		print("Max retry attempts reached. Backend connection failed.")
+		backend_error.emit("Failed to connect to backend after " + str(max_retries) + " attempts")
 
-func create_character_model():
-	"""Create character model for player characters"""
-	print("Creating character model...")
+func _on_http_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
+	"""Handle HTTP responses from backend"""
+	var response_body = body.get_string_from_utf8()
+	print("Backend response: ", response_code, " - ", response_body)
 	
-	var character_config = {
-		"name": "Mancala Player",
-		"symbol": "MPLAYER",
-		"description": "A Mancala game player character",
-		"uri": ""  # Could add character metadata URI
-	}
-	
-	var result = await honeycomb_node.create_character_model(
-		project_address,
-		character_config
-	)
-	
-	if result.success:
-		character_model_address = result.character_model_address
-		print("Character model created: ", character_model_address)
-	else:
-		print("ERROR: Failed to create character model: ", result.error)
-
-func setup_missions():
-	"""Create missions in the Honeycomb system"""
-	print("Setting up missions...")
-	
-	for mission_id in missions:
-		var mission_data = missions[mission_id]
-		
-		var mission_config = {
-			"name": mission_data.name,
-			"description": mission_data.description,
-			"reward": {
-				"resource_address": xp_resource_address,
-				"amount": mission_data.reward_xp
-			}
-		}
-		
-		var result = await honeycomb_node.create_mission(
-			project_address,
-			mission_config
-		)
-		
-		if result.success:
-			missions[mission_id]["mission_address"] = result.mission_address
-			print("Mission created: ", mission_data.name, " -> ", result.mission_address)
+	if response_code == 200:
+		var json = JSON.new()
+		var parse_result = json.parse(response_body)
+		if parse_result == OK:
+			var data = json.get_data()
+			handle_backend_response(data)
 		else:
-			print("ERROR: Failed to create mission ", mission_data.name, ": ", result.error)
+			print("ERROR: Failed to parse backend response")
+			backend_error.emit("Invalid backend response format")
+	elif response_code == 0:
+		# Connection failed - retry
+		print("Connection failed, attempting retry...")
+		retry_connection()
+	else:
+		print("ERROR: Backend request failed with code: ", response_code)
+		backend_error.emit("Backend request failed: " + str(response_code))
+		
+		# Reset retry count on successful response
+		connection_retry_count = 0
 
-func create_player_character(wallet_address: String = ""):
-	"""Create a character for the current player"""
-	if not is_connected:
-		print("Not connected to Honeycomb")
-		return null
+func handle_backend_response(data: Dictionary):
+	"""Process successful responses from backend"""
+	if data.has("ok") and data.ok:
+		if data.has("project"):
+			project_address = data.project
+			print("Backend project address: ", project_address)
+		
+		if data.has("bootstrapped") and data.bootstrapped:
+			is_backend_connected = true
+			backend_connected.emit()
+			print("✅ Backend connected successfully!")
+			
+			# Initialize player profile if we have a project
+			if project_address != "":
+				initialize_player_profile()
+	else:
+		print("Backend response indicates error: ", data)
+
+func initialize_player_profile():
+	"""Initialize player profile on the backend"""
+	if not is_backend_connected:
+		print("Backend not connected, skipping profile initialization")
+		return
 	
-	var player_wallet = wallet_address if wallet_address != "" else payer_address
-	print("Creating player character for wallet: ", player_wallet)
+	print("Initializing player profile on backend...")
 	
-	var character_data = {
-		"wallet": player_wallet,
-		"name": "Mancala Player",
-		"attributes": {
-			"level": 1,
-			"xp": 0,
-			"games_played": 0,
-			"games_won": 0
-		}
+	# For now, use a placeholder wallet address
+	# In a real implementation, this would come from the connected wallet
+	var placeholder_wallet = "placeholder_wallet_address_12345678901234567890123456789012"
+	
+	var profile_data = {
+		"userPubkey": placeholder_wallet
 	}
 	
-	var result = await honeycomb_node.create_character(
-		project_address,
-		character_model_address,
-		character_data
-	)
+	var headers = ["Content-Type: application/json"]
+	var url = backend_config.get_users_endpoint()
 	
-	if result.success:
-		character_address = result.character_address
-		print("Character created: ", character_address)
-		return result
-	else:
-		print("ERROR: Failed to create character: ", result.error)
-		return null
+	var json_string = JSON.stringify(profile_data)
+	var error = http_client.request(url, headers, HTTPClient.METHOD_POST, json_string)
+	
+	if error != OK:
+		print("ERROR: Failed to send profile creation request")
+		backend_error.emit("Failed to create profile")
+		return
+	
+	print("Profile creation request sent to backend")
 
 func grant_xp(amount: int, reason: String):
-	"""Grant XP to player both locally and on-chain"""
+	"""Grant XP to player via backend"""
 	print("Granting ", amount, " XP for: ", reason)
 	
 	var old_level = calculate_level(player_xp)
 	player_xp += amount
 	var new_level = calculate_level(player_xp)
 	
-	# Update XP on-chain if connected
-	if is_connected and character_address != "":
-		update_xp_on_chain(player_xp)
+	# Send XP grant to backend
+	if is_backend_connected and user_profile_address != "":
+		send_xp_grant_to_backend(amount, reason)
 	
 	xp_gained.emit(amount)
 	
@@ -291,23 +214,24 @@ func grant_xp(amount: int, reason: String):
 		level_up.emit(new_level)
 		check_trait_unlocks()
 
-func update_xp_on_chain(total_xp: int):
-	"""Update player's XP resource on the blockchain"""
-	if not is_connected or xp_resource_address == "" or character_address == "":
-		return
+func send_xp_grant_to_backend(amount: int, reason: String):
+	"""Send XP grant request to backend"""
+	var xp_data = {
+		"userPubkey": user_profile_address,
+		"amount": amount,
+		"reason": reason
+	}
 	
-	print("Updating XP on-chain: ", total_xp)
+	var headers = ["Content-Type: application/json"]
+	var url = backend_config.get_game_endpoint() + "/grant-xp"
 	
-	var result = await honeycomb_node.mint_resource_to_character(
-		character_address,
-		xp_resource_address,
-		total_xp
-	)
+	var json_string = JSON.stringify(xp_data)
+	var error = http_client.request(url, headers, HTTPClient.METHOD_POST, json_string)
 	
-	if result.success:
-		print("XP updated on-chain successfully")
+	if error != OK:
+		print("ERROR: Failed to send XP grant request to backend")
 	else:
-		print("ERROR: Failed to update XP on-chain: ", result.error)
+		print("XP grant request sent to backend: ", amount, " XP for ", reason)
 
 func progress_mission(mission_id: String, amount: int = 1):
 	"""Progress a mission both locally and on-chain"""
@@ -333,28 +257,6 @@ func complete_mission(mission_id: String):
 		
 		# Grant reward XP
 		grant_xp(reward_xp, "Mission: " + missions[mission_id]["name"])
-		
-		# Complete mission on-chain
-		if is_connected and missions[mission_id]["mission_address"] != "":
-			complete_mission_on_chain(mission_id)
-
-func complete_mission_on_chain(mission_id: String):
-	"""Mark mission as completed on the blockchain"""
-	var mission_address = missions[mission_id]["mission_address"]
-	if mission_address == "":
-		return
-	
-	print("Completing mission on-chain: ", mission_id)
-	
-	var result = await honeycomb_node.participate_in_mission(
-		character_address,
-		mission_address
-	)
-	
-	if result.success:
-		print("Mission completed on-chain successfully")
-	else:
-		print("ERROR: Failed to complete mission on-chain: ", result.error)
 
 func calculate_level(xp: int) -> int:
 	"""Calculate level from XP using square root progression"""
@@ -372,7 +274,8 @@ func get_player_stats() -> Dictionary:
 		"traits": player_traits,
 		"missions": missions,
 		"character_address": character_address,
-		"project_address": project_address
+		"project_address": project_address,
+		"backend_connected": is_backend_connected
 	}
 
 # GAME EVENT HANDLERS - Called from your Mancala game
@@ -412,35 +315,6 @@ func on_fast_move(move_time: float):
 		progress_mission("speed_demon")
 
 # DATA PERSISTENCE
-
-func save_project_data():
-	"""Save project and connection data"""
-	var data = {
-		"project_address": project_address,
-		"character_address": character_address,
-		"xp_resource_address": xp_resource_address,
-		"character_model_address": character_model_address
-	}
-	
-	var file = FileAccess.open("user://honeycomb_project.json", FileAccess.WRITE)
-	if file:
-		file.store_string(JSON.stringify(data))
-		file.close()
-
-func load_project_data():
-	"""Load project and connection data"""
-	var file = FileAccess.open("user://honeycomb_project.json", FileAccess.READ)
-	if file:
-		var json_string = file.get_as_text()
-		file.close()
-		var json = JSON.new()
-		var parse_result = json.parse(json_string)
-		if parse_result == OK:
-			var data = json.get_data()
-			project_address = data.get("project_address", "")
-			character_address = data.get("character_address", "")
-			xp_resource_address = data.get("xp_resource_address", "")
-			character_model_address = data.get("character_model_address", "")
 
 func save_player_data():
 	"""Save player progression data"""
@@ -484,4 +358,3 @@ func check_trait_unlocks():
 func _exit_tree():
 	"""Save data when exiting"""
 	save_player_data()
-	save_project_data()

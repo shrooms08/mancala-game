@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://c6yits07qsjhp"]
+[gd_scene load_steps=20 format=3 uid="uid://bybk4mm7o5ln7"]
 
 [ext_resource type="Script" uid="uid://b5fcdjnjwaac8" path="res://Script/main.gd" id="1_0ha60"]
 [ext_resource type="Texture2D" uid="uid://spdfuavmf3ws" path="res://Mancala/Mancala Board.png" id="1_brvut"]
@@ -667,8 +667,6 @@ process_mode = 2
 visible = false
 offset_right = 40.0
 offset_bottom = 23.0
-
-[node name="HoneyComb" type="HoneyComb" parent="."]
 
 [connection signal="pressed" from="PitNodes/Pit0" to="." method="_on_pit_0_pressed"]
 [connection signal="pressed" from="PitNodes/Pit1" to="." method="_on_pit_1_pressed"]

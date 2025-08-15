@@ -1,0 +1,162 @@
+{
+  "users": {
+    "test_user_12345678901234567890123456789012": {
+      "id": "test_user_12345678901234567890123456789012",
+      "userPubkey": "test_user_12345678901234567890123456789012",
+      "username": "TestPlayer",
+      "displayName": "Test Player",
+      "avatar": "",
+      "gameMode": "PVE",
+      "aiDifficulty": "Hard",
+      "honeycombProfile": null,
+      "createdAt": "2025-08-15T12:24:56.545Z",
+      "lastSeen": "2025-08-15T12:27:00.235Z",
+      "stats": {
+        "gamesPlayed": 1,
+        "gamesWon": 1,
+        "gamesLost": 0,
+        "totalXP": 150,
+        "currentLevel": 2,
+        "stonesCaptured": 5,
+        "extraTurns": 2,
+        "fastMoves": 3,
+        "missionsCompleted": 1,
+        "totalPlayTime": 180
+      },
+      "achievements": {
+        "firstVictory": true,
+        "captureMaster": false,
+        "extraTurnPro": false,
+        "aiSlayer": false,
+        "speedDemon": false
+      },
+      "missions": {
+        "firstVictory": {
+          "current": 1,
+          "target": 1,
+          "completed": true
+        },
+        "captureMaster": {
+          "current": 0,
+          "target": 10,
+          "completed": false
+        },
+        "extraTurnPro": {
+          "current": 0,
+          "target": 5,
+          "completed": false
+        },
+        "aiSlayer": {
+          "current": 0,
+          "target": 3,
+          "completed": false
+        },
+        "speedDemon": {
+          "current": 0,
+          "target": 10,
+          "completed": false
+        }
+      },
+      "xpHistory": [
+        {
+          "amount": 100,
+          "reason": "Test XP Grant",
+          "timestamp": "2025-08-15T12:26:39.753Z",
+          "oldXP": 0,
+          "newXP": 100,
+          "oldLevel": 1,
+          "newLevel": 2
+        }
+      ],
+      "missionHistory": [
+        {
+          "missionId": "firstVictory",
+          "progress": 1,
+          "timestamp": "2025-08-15T12:26:48.863Z",
+          "oldProgress": 0,
+          "newProgress": 1,
+          "completed": true,
+          "rewardXP": 50
+        }
+      ],
+      "gameHistory": [
+        {
+          "gameId": "game_123",
+          "result": "win",
+          "gameMode": "PVE",
+          "aiDifficulty": "Hard",
+          "stats": {
+            "stonesCaptured": 5,
+            "extraTurns": 2,
+            "fastMoves": 3,
+            "playTime": 180,
+            "totalMoves": 25
+          },
+          "timestamp": "2025-08-15T12:27:00.235Z"
+        }
+      ]
+    },
+    "user_1755268950_1234": {
+      "id": "user_1755268950_1234",
+      "userPubkey": "user_1755268950_1234",
+      "username": "AutoPlayer",
+      "displayName": "Auto Player",
+      "avatar": "",
+      "gameMode": "PVP",
+      "aiDifficulty": "Medium",
+      "honeycombProfile": null,
+      "createdAt": "2025-08-15T14:44:48.521Z",
+      "lastSeen": "2025-08-15T14:44:48.521Z",
+      "stats": {
+        "gamesPlayed": 0,
+        "gamesWon": 0,
+        "gamesLost": 0,
+        "totalXP": 0,
+        "currentLevel": 1,
+        "stonesCaptured": 0,
+        "extraTurns": 0,
+        "fastMoves": 0,
+        "missionsCompleted": 0,
+        "totalPlayTime": 0
+      },
+      "achievements": {
+        "firstVictory": false,
+        "captureMaster": false,
+        "extraTurnPro": false,
+        "aiSlayer": false,
+        "speedDemon": false
+      },
+      "missions": {
+        "firstVictory": {
+          "current": 0,
+          "target": 1,
+          "completed": false
+        },
+        "captureMaster": {
+          "current": 0,
+          "target": 10,
+          "completed": false
+        },
+        "extraTurnPro": {
+          "current": 0,
+          "target": 5,
+          "completed": false
+        },
+        "aiSlayer": {
+          "current": 0,
+          "target": 3,
+          "completed": false
+        },
+        "speedDemon": {
+          "current": 0,
+          "target": 10,
+          "completed": false
+        }
+      }
+    }
+  },
+  "usersList": [
+    "test_user_12345678901234567890123456789012",
+    "user_1755268950_1234"
+  ]
+}
