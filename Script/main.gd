@@ -1,4 +1,4 @@
-# main.gd - Updated to integrate with Honeycomb Protocol
+# main.gd - Updated to integrate with Honeycomb Protocol and Backend
 extends Node2D
 
 var pits = [4,4,4,4,4,4,0,4,4,4,4,4,4,0] #initial stones
@@ -26,8 +26,9 @@ var last_move_time: Dictionary = {}   # Changed from float to Dictionary
 @onready var paused_overlay: Label = $PausedOverlay
 @onready var honey_comb: HoneyComb = $HoneyComb
 
-# Reference to the HoneycombManager autoload
+# Reference to the HoneycombManager and GameProgressTracker autoloads
 var honeycomb_manager: Node
+var progress_tracker: Node
 
 signal game_ended(winner)
 
@@ -36,8 +37,9 @@ func _ready():
 	#randomize()
 	print("Game starting...")
 	
-	# Get reference to HoneycombManager autoload (you'll need to add this to autoload)
+	# Get references to autoloads
 	honeycomb_manager = get_node("/root/HoneycombManager")
+	progress_tracker = get_node("/root/GameProgressTracker")
 	
 	# Set up Honeycomb integration
 	if honey_comb and honeycomb_manager:
@@ -52,6 +54,12 @@ func _ready():
 		honeycomb_manager.mission_completed.connect(_on_mission_completed)
 	else:
 		print("WARNING: Honeycomb integration not available")
+	
+	# Set up progress tracking
+	if progress_tracker:
+		progress_tracker.xp_gained.connect(_on_backend_xp_gained)
+		progress_tracker.level_up.connect(_on_backend_level_up)
+		progress_tracker.mission_completed.connect(_on_backend_mission_completed)
 	
 	debug_node_structure()
 	connect_touchscreen_signals()
@@ -90,6 +98,12 @@ func _ready():
 	extra_turns_this_game = 0
 	last_move_time = {} # Initialize as empty Dictionary
 	
+	# Start tracking this game in the progress tracker
+	if progress_tracker:
+		var game_mode = "PVE" if vs_ai else "PVP"
+		var ai_difficulty = GameGlobals.ai_difficulty if vs_ai else ""
+		progress_tracker.start_new_game(game_mode, ai_difficulty)
+	
 	if GameGlobals.is_ai_game() and player_turn == 0:
 		ai_timer = ai_delay
 
@@ -114,11 +128,28 @@ func _on_mission_completed(mission_id: String, reward_xp: int):
 	print("🏆 Mission Completed: ", mission_id, " (+", reward_xp, " XP)")
 	show_status_message("Mission Complete! +" + str(reward_xp) + " XP", Color.PURPLE)
 
+# Backend progress tracking handlers
+func _on_backend_xp_gained(amount: int, reason: String):
+	print("🎉 Backend XP Gained: +", amount, " for ", reason)
+	show_status_message("+" + str(amount) + " XP! (" + reason + ")", Color.YELLOW)
+
+func _on_backend_level_up(new_level: int):
+	print("🎊 Backend LEVEL UP! New level: ", new_level)
+	show_status_message("LEVEL UP! Level " + str(new_level), Color.GOLD)
+
+func _on_backend_mission_completed(mission_id: String, reward_xp: int):
+	print("🏆 Backend Mission Completed: ", mission_id, " (+", reward_xp, " XP)")
+	show_status_message("Mission Complete! +" + str(reward_xp) + " XP", Color.PURPLE)
+
 func player_move(pit_index: int):
 	# Record move time for speed tracking
 	last_move_time = Time.get_time_dict_from_system()
 	
 	print("Player moved from pit: ", pit_index)
+	
+	# Record move in progress tracker
+	if progress_tracker:
+		progress_tracker.record_move()
 
 func _process(delta):
 	if GameGlobals.is_ai_game() and player_turn == 0 and !is_animating and !game_over and !is_paused:
@@ -432,9 +463,12 @@ func handle_pit_click(index):
 	var move_time = calculate_time_difference(last_move_time, current_time)
 	last_move_time = current_time
 	
-	# Track fast moves for Honeycomb
+	# Track fast moves for Honeycomb and backend
 	if honeycomb_manager and move_time > 0:
 		honeycomb_manager.on_fast_move(move_time)
+	
+	if progress_tracker and move_time > 0:
+		progress_tracker.record_fast_move(move_time)
 	
 	# Start the animated stone distribution
 	animate_stone_distribution(index)
@@ -599,10 +633,13 @@ func complete_move(final_index):
 	# Check for capture
 	var captured_stones = check_capture(final_index)
 	
-	# Track captures for Honeycomb
-	if captured_stones > 0 and honeycomb_manager:
+	# Track captures for Honeycomb and backend
+	if captured_stones > 0:
 		stones_captured_this_game += captured_stones
-		honeycomb_manager.on_stones_captured(captured_stones)
+		if honeycomb_manager:
+			honeycomb_manager.on_stones_captured(captured_stones)
+		if progress_tracker:
+			progress_tracker.record_stone_capture(captured_stones)
 	
 	# Check if player gets another turn
 	var player_store = 6 if player_turn == 0 else 13
@@ -613,9 +650,11 @@ func complete_move(final_index):
 		print("Player ", player_turn, " gets another turn!")
 		show_status_message("Extra Turn", Color.WHITE)
 		extra_turns_this_game += 1
-		# Track extra turns for Honeycomb
+		# Track extra turns for Honeycomb and backend
 		if honeycomb_manager:
 			honeycomb_manager.on_extra_turn()
+		if progress_tracker:
+			progress_tracker.record_extra_turn()
 	
 	# Reset AI timer if it's AI's turn (AI is player 0)
 	if GameGlobals.is_ai_game() and player_turn == 0:
@@ -700,33 +739,53 @@ func end_game():
 	
 	var winner_text = ""
 	var player_won = false
+	var game_result = "tie"
 	
 	if vs_ai:
 		if player2_score > player1_score:  # Player 2 (human) wins
 			winner_text = "You Win!"
 			player_won = true
+			game_result = "win"
 		elif player1_score > player2_score:  # AI wins
 			winner_text = "AI Wins!"
+			game_result = "loss"
 		else:
 			winner_text = "It's a TIE!"
+			game_result = "tie"
 	else:
 		if player1_score > player2_score:
 			winner_text = "Player 1 Wins!"
 			player_won = (player_turn == 0)  # If it was player 1's turn
+			game_result = "win" if player_won else "loss"
 		elif player2_score > player1_score:
 			winner_text = "Player 2 Wins!"
 			player_won = (player_turn == 1)  # If it was player 2's turn
+			game_result = "win" if player_won else "loss"
 		else:
 			winner_text = "It's a TIE!"
+			game_result = "tie"
 	
 	show_status_message("Game Over\n" + winner_text, Color.WHITE)
 	new_game_button.visible = true
 	
-	# Report game result to Honeycomb
-	if honeycomb_manager and player_won:
+	# Report game result to Honeycomb and backend
+	if player_won:
 		var ai_difficulty = GameGlobals.ai_difficulty if vs_ai else ""
-		honeycomb_manager.on_game_won(vs_ai, ai_difficulty)
-		print("🎉 Game victory reported to Honeycomb!")
+		if honeycomb_manager:
+			honeycomb_manager.on_game_won(vs_ai, ai_difficulty)
+		if progress_tracker:
+			progress_tracker.record_game_victory(vs_ai, ai_difficulty)
+		print("🎉 Game victory reported to Honeycomb and backend!")
+	
+	# Submit final game stats to backend
+	if progress_tracker:
+		var final_stats = {
+			"stones_captured": stones_captured_this_game,
+			"extra_turns": extra_turns_this_game,
+			"fast_moves": progress_tracker.get_current_game_stats().get("fast_moves", 0),
+			"total_moves": progress_tracker.get_current_game_stats().get("total_moves", 0)
+		}
+		progress_tracker.end_game(game_result, final_stats)
 
 func restart_game():
 	pits = [4,4,4,4,4,4,0,4,4,4,4,4,4,0]
@@ -740,6 +799,12 @@ func restart_game():
 	extra_turns_this_game = 0
 	game_start_time = Time.get_time_dict_from_system()
 	last_move_time = {}
+	
+	# Start new game tracking
+	if progress_tracker:
+		var game_mode = "PVE" if vs_ai else "PVP"
+		var ai_difficulty = GameGlobals.ai_difficulty if vs_ai else ""
+		progress_tracker.start_new_game(game_mode, ai_difficulty)
 	
 	update_board_display()
 	update_game_ui()

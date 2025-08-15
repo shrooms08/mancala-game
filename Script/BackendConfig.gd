@@ -19,6 +19,11 @@ class_name BackendConfig
 
 func get_full_backend_url() -> String:
 	"""Get the complete backend URL with protocol and port"""
+	# If backend_url already contains a port, use it as is
+	if ":" in backend_url.split("//")[-1]:
+		return backend_url
+	
+	# Otherwise, construct the URL properly
 	var protocol = "https://" if use_https else "http://"
 	var host = backend_url.replace("http://", "").replace("https://", "")
 	return protocol + host + ":" + str(backend_port)

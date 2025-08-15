@@ -3,7 +3,7 @@ extends Node
 
 # Backend configuration
 var backend_config: BackendConfig
-var backend_url: String = "http://localhost:8080"
+var backend_url: String = "http://localhost"
 var is_backend_connected: bool = false
 var project_address: String = ""
 

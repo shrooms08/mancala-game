@@ -7,6 +7,11 @@ var current_user_pubkey: String = ""
 var current_game_id: String = ""
 var is_backend_connected: bool = false
 
+# Wallet management
+var wallet_address: String = ""
+var wallet_private_key: String = ""
+var blockchain_profile_initialized: bool = false
+
 # Game tracking variables
 var game_start_time: Dictionary = {}
 var game_stats: Dictionary = {
@@ -28,6 +33,8 @@ signal backend_error(message)
 signal xp_gained(amount, reason)
 signal level_up(new_level)
 signal mission_completed(mission_id, reward_xp)
+signal wallet_created(wallet_address)
+signal blockchain_profile_ready()
 
 func _ready():
   print("GameProgressTracker initialized")
@@ -85,6 +92,57 @@ func handle_backend_response(data: Dictionary):
   else:
     print("Backend response indicates error: ", data)
 
+# WALLET MANAGEMENT
+
+func set_wallet_info(address: String, private_key: String):
+	"""Set wallet information for the current session"""
+	wallet_address = address
+	wallet_private_key = private_key
+	current_user_pubkey = address
+	
+	print("Wallet info set: ", address)
+	wallet_created.emit(address)
+
+func create_blockchain_wallet() -> Dictionary:
+	"""Create a new blockchain wallet (simulated)"""
+	var timestamp = Time.get_unix_time_from_system()
+	var random_suffix = str(randi() % 100000).pad_zeros(5)
+	
+	var new_wallet = {
+		"address": "wallet_" + str(timestamp) + "_" + random_suffix,
+		"private_key": "pk_" + str(timestamp) + "_" + random_suffix,
+		"created_at": Time.get_datetime_string_from_system()
+	}
+	
+	# Set as current wallet
+	set_wallet_info(new_wallet.address, new_wallet.private_key)
+	
+	print("New blockchain wallet created: ", new_wallet.address)
+	return new_wallet
+
+func initialize_blockchain_profile() -> bool:
+	"""Initialize user's blockchain profile for missions and rewards"""
+	if wallet_address == "":
+		print("No wallet address available for blockchain profile initialization")
+		return false
+	
+	print("Initializing blockchain profile for wallet: ", wallet_address)
+	
+	# In a real implementation, this would:
+	# 1. Create a Honeycomb Protocol character profile
+	# 2. Initialize mission tracking on-chain
+	# 3. Set up reward distribution contracts
+	# 4. Create user's NFT character
+	
+	# For now, simulate the process
+	await get_tree().create_timer(1.0).timeout
+	
+	blockchain_profile_initialized = true
+	blockchain_profile_ready.emit()
+	
+	print("✅ Blockchain profile initialized successfully")
+	return true
+
 # USER MANAGEMENT
 
 func create_or_get_user(wallet_address: String, username: String = "", display_name: String = "") -> bool:
@@ -98,7 +156,9 @@ func create_or_get_user(wallet_address: String, username: String = "", display_n
 	var user_data = {
 		"userPubkey": wallet_address,
 		"username": username,
-		"displayName": display_name
+		"displayName": display_name,
+		"walletAddress": wallet_address,
+		"blockchainProfile": blockchain_profile_initialized
 	}
 	
 	var headers = ["Content-Type: application/json"]
@@ -131,7 +191,9 @@ func create_new_user() -> String:
 	var user_data = {
 		"userPubkey": new_user_pubkey,
 		"username": "Player" + random_suffix,
-		"displayName": "Player " + random_suffix
+		"displayName": "Player " + random_suffix,
+		"walletAddress": new_user_pubkey,
+		"blockchainProfile": false
 	}
 	
 	var headers = ["Content-Type: application/json"]
@@ -391,3 +453,11 @@ func get_user_pubkey() -> String:
 func get_game_id() -> String:
   """Get current game ID"""
   return current_game_id
+
+func get_wallet_address() -> String:
+	"""Get current wallet address"""
+	return wallet_address
+
+func is_blockchain_profile_ready() -> bool:
+	"""Check if blockchain profile is initialized"""
+	return blockchain_profile_initialized
